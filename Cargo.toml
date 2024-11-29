@@ -1,6 +1,6 @@
 [package]
 name = "oreneta"
-authors = ["Poyo! <poyo@poyo.study>", "Segfault", "Elijah Spitzer"]
+authors = ["Elijah Spitzer", "Segfault","Poyo! <poyo@poyo.study>"]
 version = "0.0.1"
 edition = "2021"
 
