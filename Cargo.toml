@@ -1,7 +1,20 @@
 [package]
 name = "oreneta"
-authors = ["Elijah Spitzer", "Segfault","Poyo! <poyo@poyo.study>"]
-version = "0.0.1"
+version = "0.1.0"
 edition = "2021"
+authors = ["Poyo <poyo@poyo.study, MrDaPoyo on GitHub>", "Segfault <AI314159 on GitHub>"]
+# Not gonna lie, C is a lot easier than this
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
 
 [dependencies]
+bootloader = "0.9"
+# command btw is qemu-system-x86_64 path/to/file. 
+# stage changes first
+# Yes.
+# I have never worked on a collaborative project before, it is really fun.
+# Nah, you will learn quickly!
+# I learned with C, you will have the advantage, not being weight down by old languages.The build
