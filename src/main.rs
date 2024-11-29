@@ -23,18 +23,17 @@ static HELLO: &[u8] = b"Hello, Rust OSDev world!";
 
 
 #[no_mangle]
-pub extern "C" fn _start() -> ! {
+pub extern "C" fn kmain() -> ! {
     let vga_buffer = 0xb8000 as *mut u8;
 
     for (i, &byte) in HELLO.iter().enumerate() {
         unsafe {
-            // LMFAO 
-            // Try building
             // cool! I am listening to my bad membrane keyboard
             *vga_buffer.offset(i as isize * 2) = byte; // dam, this gran turismo playlist im listening to rn is a bangerrrr
             *vga_buffer.offset(i as isize * 2 + 1) = 0xb;
         }
-    }
+        // I'm gonna copy my code into this.
+    } // oki :D 
     loop {}
 }
 // Yeah. VGA is an array in memory, each char is two bytes. the char, then a color byte

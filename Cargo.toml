@@ -11,7 +11,6 @@ panic = "abort"
 panic = "abort"
 
 [dependencies]
-bootloader = "0.9"
 # command btw is qemu-system-x86_64 path/to/file. 
 # stage changes first
 # Yes.
