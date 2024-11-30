@@ -1,5 +1,5 @@
 [build]
-target = "i686-oreneta.json"
+target = "config/i686-oreneta.json"
 
 # [target.'cfg(target_os = "none")']
 # runner = "bootimage runner"

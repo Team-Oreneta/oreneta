@@ -1,8 +1,9 @@
 ARCH := i686
 TARGET := debug
-LDFILE := linker.ld
+
+LDFILE := config/linker.ld
 LD := clang -target $(ARCH)-elf
-GRUB_CFG := grub.cfg
+GRUB_CFG := config/grub.cfg
 
 # This is where cargo compiles to
 LIB_PATH := target/$(ARCH)-oreneta/$(TARGET)/liboreneta.a
@@ -33,7 +34,7 @@ clean:
 	cargo clean
 
 # Tabs need to be tabs in Makefiles!!!
-# wait!
+# maybe we should clean up our config files into a dir?
 build/arch/$(ARCH)/asm/%.o: src/arch/$(ARCH)/asm/%.asm
 	mkdir -p $(shell dirname $@)
 	echo "[ASM] $<"
