@@ -16,7 +16,6 @@ crate-type = ["staticlib"]
 [profile.release]
 panic = "abort"
 
-[dependencies]
 # command btw is qemu-system-x86_64 path/to/file. 
 # stage changes first
 # Yes.

@@ -20,9 +20,7 @@ build/oreneta.iso: build/kernel.bin
 
 run: build/oreneta.iso
 	qemu-system-x86_64 -cdrom $<
-
 # the @ signs at start of lines mean "don't show command"
-# This links kernel.bin as the assembly object files as deps
 build/kernel.bin: rustbuild $(ASM_OBJ_FILES)
 	$(LD) -T $(LDFILE) -o $@ -ffreestanding -nostdlib $(ASM_OBJ_FILES) $(LIB_PATH) -lgcc
 
