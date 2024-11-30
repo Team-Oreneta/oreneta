@@ -7,6 +7,12 @@ authors = ["Poyo <poyo@poyo.study, MrDaPoyo on GitHub>", "Segfault <AI314159 on 
 [profile.dev]
 panic = "abort"
 
+# this means compile as a static library so we can link to the assembly
+[lib]
+path = "src/main.rs"
+name = "oreneta"
+crate-type = ["staticlib"]
+
 [profile.release]
 panic = "abort"
 
