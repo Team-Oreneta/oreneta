@@ -7,6 +7,7 @@
 // mod gdt
 use core::panic::PanicInfo;
 // mod vga_buffer;
+mod text;
 // done
 // thank you
 #[panic_handler]
@@ -25,6 +26,7 @@ fn panic(_info: &PanicInfo) -> ! {
 #[no_mangle]
 pub extern "C" fn kmain() -> ! {
     // vga_buffer::print_something();
+    text::print_something();
     loop {}
 }
 // Yeah. VGA is an array in memory, each char is two bytes. the char, then a color byte
