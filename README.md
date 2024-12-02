@@ -19,7 +19,13 @@ llvm-config --version
 
 You also need **Rust**, of course, which you can get by following [these](https://www.rust-lang.org/tools/install) instructions.
 
-After installing **Rust**, do: `rustup override set nightly`
+You can also use the `setupenv.sh` to automatically install dependencies for your OS (currently not working on MacOS)
+
+After installing **Rust**, do:
+ ```bash
+ rustup toolchain install nightly
+ rustup override set nightly
+ ```
 
 ## Building
 
