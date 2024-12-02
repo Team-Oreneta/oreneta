@@ -30,7 +30,7 @@ jobs:
     - name: List Generated Files
       run: ls -lah
 
-    - name: Upload ISO as Release Asset
+    - name: Upload ISO as Release
       uses: actions/upload-artifact@v3
       with:
         name: generated-iso
