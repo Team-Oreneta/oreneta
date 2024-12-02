@@ -19,6 +19,8 @@ llvm-config --version
 
 You also need **Rust**, of course, which you can get by following [these](https://www.rust-lang.org/tools/install) instructions.
 
+After installing **Rust**, do: `rustup override set nightly`
+
 ## Building
 
 To build, simply run `make`. This will compile the Rust into a static library, compile the assembly, and then link with `clang`. It then uses `grub-mkrescue` to generate an ISO file. You can also run `make run` to run the code in QEMU.
