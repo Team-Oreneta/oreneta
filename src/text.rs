@@ -1,55 +1,44 @@
 use core::ptr;
+use font8x8::legacy::BASIC_LEGACY;
+
 const FRAMEBUFFER: *mut u32 = 0xA0000 as *mut u32;
 const WIDTH: usize = 1024;
 const HEIGHT: usize = 768;
 
+/// Draw a pixel at (x, y) with the specified color
 fn draw_pixel(x: usize, y: usize, color: u32) {
-    unsafe {
-        ptr::write_volatile(FRAMEBUFFER.add(y * WIDTH + x), color);
-    }
-}
-
-fn draw_char(x: usize, y: usize, c: char, color: u32) {
-    let font = get_font_data(c);
-    font.iter().enumerate().flat_map(|(i, row)| {
-        let index = i; 
-        row.iter().enumerate().filter_map(move |(j, &pixel)| {
-            if pixel != 0 {
-                Some((x + j, y + index))
-            } else {
-                None
-            }
-        })
-    }).for_each(|(px, py)| draw_pixel(px, py, color));
-}
-
-fn get_font_data(c: char) -> [[u8; 8]; 8] {
-    // Simple 8x8 font data for demonstration purposes
-    match c {
-        'A' => [
-            [0, 1, 1, 1, 1, 1, 1, 0],
-            [0, 1, 0, 0, 0, 0, 1, 0],
-            [0, 1, 0, 0, 0, 0, 1, 0],
-            [0, 1, 1, 1, 1, 1, 1, 0],
-            [0, 1, 0, 0, 0, 0, 1, 0],
-            [0, 1, 0, 0, 0, 0, 1, 0],
-            [0, 1, 0, 0, 0, 0, 1, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-        ],
-        _ => [[0; 8]; 8],
-    }
-}
-pub fn print_something() {
-    let text = "A\nA";
-    let mut x = 0;
-    let mut y = 0;
-    for c in text.chars() {
-        if c == '\n' {
-            y += 8;
-            x = 0;
-        } else {
-            draw_char(x, y, c, 0xFF_FF_FF_FF);
-            x += 8;
+    if x < WIDTH && y < HEIGHT {
+        unsafe {
+            // Write pixel color into the framebuffer
+            ptr::write_volatile(FRAMEBUFFER.add(y * WIDTH + x), color);
         }
     }
+}
+
+/// Draw a character at (x, y) using the specified color
+fn draw_char(x: usize, y: usize, c: char, color: u32) {
+    // Directly index into the BASIC_LEGACY font array
+    let font = BASIC_LEGACY[c as usize];
+    // Iterate over the 8x8 bitmap
+    for (row_index, row) in font.iter().enumerate() {
+        for col_index in 0..8 {
+            if (row >> col_index) & 1 != 0 {
+                // Draw pixel if the bit is set
+                draw_pixel(x + col_index, y + row_index, color);
+            }
+        }
+    }
+}
+
+/// Print a string to the framebuffer
+fn print_string(x: usize, y: usize, text: &str, color: u32) {
+    let mut cursor_x = x;
+    for c in text.chars() {
+        draw_char(cursor_x, y, c, color);
+        cursor_x += 8; // Move to the next character position
+    }
+}
+
+pub fn printSomething() {
+    print_string(8, 8, "oh mama", 0xFFFFFF);
 }

@@ -18,6 +18,7 @@ panic = "abort"
 
 [dependencies]
 volatile = "0.2.6"
+font8x8 = { version = "0.3", default-features = false }
 
 # command btw is qemu-system-x86_64 path/to/file. 
 # stage changes first
