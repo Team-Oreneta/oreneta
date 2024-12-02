@@ -19,6 +19,7 @@ jobs:
         sudo apt update
         sudo apt install -y build-essential nasm xorriso clang grub-common mtools qemu
         sudo apt install -y llvm clang
+        sudo apt install -y gcc-multilib g++-multilib # Ensure multilib compatibility for 32-bit support.
 
     - name: Install Rust and Configure Toolchain
       run: |
