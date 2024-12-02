@@ -17,7 +17,8 @@ jobs:
     - name: Install Dependencies (Debian-based)
       run: |
         sudo apt update
-        sudo apt install -y base-devel nasm xorriso llvm-tools clang grub-common mtools qemu
+        sudo apt install -y build-essential nasm xorriso clang grub-common mtools qemu
+        sudo apt install -y llvm clang # llvm-tools can be part of llvm or clang packages.
 
     - name: Install Rust
       run: |
