@@ -1,7 +1,7 @@
 use core::ptr;
 const FRAMEBUFFER: *mut u32 = 0xA0000 as *mut u32;
-const WIDTH: usize = 320;
-const HEIGHT: usize = 200;
+const WIDTH: usize = 1024;
+const HEIGHT: usize = 768;
 
 fn draw_pixel(x: usize, y: usize, color: u32) {
     unsafe {
