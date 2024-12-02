@@ -1,13 +1,13 @@
-name: Build and Release Oreneta ISO
+name: Build ISO on Commit
 
 on:
-  release:
-    types:
-      - published
+  push:
+    branches:
+      - '**' # Triggers on any branch push. Adjust to target specific branches if needed.
 
 jobs:
   build:
-    name: Build ISO and Create Release Assets
+    name: Build ISO
     runs-on: ubuntu-latest
 
     steps:
@@ -30,8 +30,8 @@ jobs:
     - name: List Generated Files
       run: ls -lah
 
-    - name: Upload ISO as Release Asset
+    - name: Upload ISO as Build Artifact
       uses: actions/upload-artifact@v3
       with:
         name: generated-iso
-        path: ./oreneta.iso # Replace with the actual path to your ISO
+        path: ./oreneta.iso # Replace with the actual path to the generated ISO
