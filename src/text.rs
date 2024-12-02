@@ -31,7 +31,7 @@ fn draw_char(x: usize, y: usize, c: char, color: u32) {
 }
 
 /// Print a string to the framebuffer
-fn print_string(x: usize, y: usize, text: &str, color: u32) {
+pub fn print_string(x: usize, y: usize, text: &str, color: u32) {
     let mut cursor_x = x;
     for c in text.chars() {
         draw_char(cursor_x, y, c, color);
@@ -39,6 +39,6 @@ fn print_string(x: usize, y: usize, text: &str, color: u32) {
     }
 }
 
-pub fn printSomething() {
-    print_string(8, 8, "oh mama", 0xFFFFFF);
+pub fn boot_message() {
+    print_string(8, 8, "Oreneta Booting Up!", 0xFFFFFF);
 }
