@@ -18,12 +18,15 @@ jobs:
       run: |
         sudo apt update
         sudo apt install -y build-essential nasm xorriso clang grub-common mtools qemu
-        sudo apt install -y llvm clang # llvm-tools can be part of llvm or clang packages.
+        sudo apt install -y llvm clang
 
-    - name: Install Rust
+    - name: Install Rust and Configure Toolchain
       run: |
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
         source $HOME/.cargo/env
+        rustup install nightly-x86_64-unknown-linux-gnu
+        rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
+        rustup override set nightly
 
     - name: Build ISO
       run: make
