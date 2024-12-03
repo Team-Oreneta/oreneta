@@ -3,33 +3,23 @@
 #![no_std]
 #![no_main]
 
-
 // mod gdt
-use core::panic::PanicInfo;
-// mod vga_buffer;
+use core::{mem, panic::PanicInfo, slice};
+use multiboot::information::PAddr;
+
+mod multiboot_fb;
 mod text;
-// done
-// thank you
+
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
     loop {}
 }
 
-// This has to be set to no_mangle because it will be called from assembly.
-// Rust by default mangles function and varaible names to include stuff like
-// type information. We cannot have that.
-// _start is UNIX/ELF callZing convention
-// Okay, I asked them to stop having conversations in my thread :)
-
-// lmao sure
-
 #[no_mangle]
-pub extern "C" fn kmain() -> ! {
+pub extern "C" fn kmain(info_ptr: PAddr) -> ! {
     // vga_buffer::print_something();
-    text::boot_message();
+    let multiboot_struct = multiboot_fb::use_multiboot(info_ptr);
+    let fb = multiboot_fb::get_framebuffer(multiboot_struct);
+    fb.boot_message();
     loop {}
 }
-// Yeah. VGA is an array in memory, each char is two bytes. the char, then a color byte
-// is this some kind of "for each character i string print character?"
-// feel free to leave silly easter eggs in the comments
-// This should work shouldnt it?
