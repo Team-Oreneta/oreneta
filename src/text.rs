@@ -1,6 +1,8 @@
 use core::ptr;
 use font8x8::legacy::BASIC_LEGACY;
 
+const LINE_SPACING: usize = 12;
+
 pub struct Framebuffer {
     pub framebuffer: *mut u32,
     pub width: usize,
@@ -50,7 +52,7 @@ impl Framebuffer {
 
                 if c == '\n' {
                     *&mut self.cursor_x = 0;
-                    *&mut self.cursor_y += 8;
+                    *&mut self.cursor_y += LINE_SPACING;
                 } else {
                     self.draw_char(self.cursor_x, self.cursor_y, c, color);
                     *&mut self.cursor_x += 8;
@@ -58,7 +60,7 @@ impl Framebuffer {
                     // Wrap to the next line if we exceed the screen self.width
                     if self.cursor_x >= self.width {
                         *&mut self.cursor_x = 0;
-                        *&mut self.cursor_y += 8;
+                        *&mut self.cursor_y += LINE_SPACING;
                     }
                 }
 
