@@ -8,7 +8,7 @@ elif [ -f "/etc/os-release" ]; then
         os=$"Debian/Ubuntu"
 	apt install base-devel nasm xorriso llvm-tools clang
 	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-	rustup toolchain install nightlyB
+	rustup toolchain install nightly
 	rustup override set nightly
     elif grep -q "Arch" /etc/os-release; then
         os=$"Arch"
