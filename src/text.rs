@@ -1,68 +1,69 @@
 use core::ptr;
 use font8x8::legacy::BASIC_LEGACY;
 
-const FRAMEBUFFER: *mut u32 = 0xA0000 as *mut u32;
-const WIDTH: usize = 1024;
-const HEIGHT: usize = 768;
+pub struct Framebuffer {
+    pub framebuffer: *mut u32,
+    pub width: usize,
+    pub height: usize,
+    pub cursor_y: usize,
+    pub cursor_x: usize,
+}
 
-// A global cursor to keep track of the current print position
-static mut CURSOR_X: usize = 0;
-static mut CURSOR_Y: usize = 0;
-
-// Draw a pixel at (x, y) with the specified color
-fn draw_pixel(x: usize, y: usize, color: u32) {
-    if x < WIDTH && y < HEIGHT {
+impl Framebuffer {
+    // Draw a pixel at (x, y) with the specified color
+    fn draw_pixel(&self, x: usize, y: usize, color: u32) {
+        // if x < self.width && y < self.height {
         unsafe {
-            ptr::write_volatile(FRAMEBUFFER.add(y * WIDTH + x), color);
+            ptr::write_volatile(self.framebuffer.add(y * self.width + x), color);
         }
+        // }
     }
-}
 
-// Draw a character at (x, y) using the specified color
-fn draw_char(x: usize, y: usize, c: char, color: u32) {
-    let font = BASIC_LEGACY[c as usize];
-    for (row_index, row) in font.iter().enumerate() {
-        for col_index in 0..8 {
-            if (row >> col_index) & 1 != 0 {
-                draw_pixel(x + col_index, y + row_index, color);
-            }
-        }
-    }
-}
-
-// Print a string to the framebuffer
-pub fn print_string(text: &str, color: u32) {
-    unsafe {
-        for c in text.chars() {
-            // Stop printing if we exceed the screen height
-            if CURSOR_Y + 8 > HEIGHT {
-                break;
-            }
-
-            if c == '\n' {
-                CURSOR_X = 0;
-                CURSOR_Y += 8;
-            } else {
-                draw_char(CURSOR_X, CURSOR_Y, c, color);
-                CURSOR_X += 8;
-
-                // Wrap to the next line if we exceed the screen width
-                if CURSOR_X >= WIDTH {
-                    CURSOR_X = 0;
-                    CURSOR_Y += 8;
+    // Draw a character at (x, y) using the specified color
+    fn draw_char(&self, x: usize, y: usize, c: char, color: u32) {
+        let font = BASIC_LEGACY[c as usize];
+        for (row_index, row) in font.iter().enumerate() {
+            for col_index in 0..8 {
+                if (row >> col_index) & 1 != 0 {
+                    self.draw_pixel(x + col_index, y + row_index, color);
                 }
             }
-
-            // Debug: Track cursor position
-            // Comment out in release builds
-            // println!("CURSOR_X: {}, CURSOR_Y: {}", CURSOR_X, CURSOR_Y);
         }
     }
-}
 
-// Print the logo to the framebuffer
-pub fn print_logo(color: u32) {
-    let logo = r#"
+    // Print a string to the framebuffer
+    pub fn print_string(&mut self, text: &str, color: u32) {
+        unsafe {
+            for c in text.chars() {
+                // Stop printing if we exceed the screen self.height
+                if self.cursor_y + 8 > self.height {
+                    break;
+                }
+
+                if c == '\n' {
+                    *&mut self.cursor_x = 0;
+                    *&mut self.cursor_y += 8;
+                } else {
+                    self.draw_char(self.cursor_x, self.cursor_y, c, color);
+                    *&mut self.cursor_x += 8;
+
+                    // Wrap to the next line if we exceed the screen self.width
+                    if self.cursor_x >= self.width {
+                        *&mut self.cursor_x = 0;
+                        *&mut self.cursor_y += 8;
+                    }
+                }
+
+                // Debug: Track cursor position
+                // Comment out in release builds
+                // println!("&mut self.cursor_x: {}, &mut self.cursor_y: {}", &mut self.cursor_x, &mut self.cursor_y);
+            }
+        }
+    }
+
+    // Print the logo to the framebuffer
+    pub fn print_logo(&mut self, color: u32) {
+        let logo = r#"
                                                                          .-%@@@*.                   
                                                                           :@@@@@@*                  
                                                                           -@@P@@@@@#                
@@ -85,35 +86,38 @@ pub fn print_logo(color: u32) {
                                                                                              .*  
     "#;
 
-    // Reset cursor position for logo rendering
-    unsafe {
-        CURSOR_X = 0;
-        CURSOR_Y += 8; // Add some spacing if required
+        // Reset cursor position for logo rendering
+        unsafe {
+            *&mut self.cursor_x = 0;
+            *&mut self.cursor_y += 8; // Add some spacing if required
+        }
+
+        // Print the logo
+        self.print_string(logo, color);
     }
 
-    // Print the logo
-    print_string(logo, color);
-}
+    fn fill_screen_with_red_dots(&self) {
+        const RED_COLOR: u32 = 0xFF0000; // RGB color for red
 
-fn fill_screen_with_red_dots() {
-    const RED_COLOR: u32 = 0xFF0000; // RGB color for red
-
-    for y in (0..HEIGHT).step_by(2) { // Skip alternate rows for dot effect
-        for x in (0..WIDTH).step_by(2) { // Skip alternate columns for dot effect
-            draw_pixel(x, y, RED_COLOR);
+        for y in (0..self.height) {
+            // Skip alternate rows for dot effect
+            for x in (0..self.width) {
+                // Skip alternate columns for dot effect
+                self.draw_pixel(x, y, RED_COLOR);
+            }
         }
     }
-}
 
-// Boot message with the logo
-pub fn boot_message() {
-    unsafe {
-        // print_logo(0xFFFFFF);
-        // CURSOR_Y += 8; // Add spacing after the logo
-        // print_string(
-        //     "Oreneta Booting Up!\nWelcome to Oreneta :D\nMade by Segfault, Poyo, Jake and Elijah with lots of <3.",
-        //     0xFFFFFF,
-        // );
-        fill_screen_with_red_dots();
+    // Boot message with the logo
+    pub fn boot_message(&self) {
+        unsafe {
+            // print_logo(0xFFFFFF);
+            // &mut self.cursor_y += 8; // Add spacing after the logo
+            // self.print_string(
+                // "Oreneta Booting Up!\nWelcome to Oreneta :D\nMade by Segfault, Poyo, Jake and Elijah with lots of <3.",
+                // 0xFFFFFF,
+            // );
+            self.fill_screen_with_red_dots();
+        }
     }
 }
