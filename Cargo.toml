@@ -17,6 +17,7 @@ crate-type = ["staticlib"]
 panic = "abort"
 
 [dependencies]
+multiboot = "0.8.0"
 volatile = "0.2.6"
 font8x8 = { version = "0.3", default-features = false }
 
