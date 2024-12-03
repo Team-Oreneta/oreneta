@@ -18,7 +18,7 @@ panic = "abort"
 
 [dependencies]
 multiboot = "0.8.0"
-volatile = "0.2.6"
+volatile = "0.6.1"
 font8x8 = { version = "0.3", default-features = false }
 
 # command btw is qemu-system-x86_64 path/to/file. 

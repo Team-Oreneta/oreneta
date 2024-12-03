@@ -4,7 +4,7 @@
 #![no_main]
 
 // mod gdt
-use core::{mem, panic::PanicInfo, slice};
+use core::{panic::PanicInfo};
 use multiboot::information::PAddr;
 
 mod multiboot_fb;
@@ -19,7 +19,7 @@ fn panic(_info: &PanicInfo) -> ! {
 pub extern "C" fn kmain(info_ptr: PAddr) -> ! {
     // vga_buffer::print_something();
     let multiboot_struct = multiboot_fb::use_multiboot(info_ptr);
-    let fb = multiboot_fb::get_framebuffer(multiboot_struct);
+    let mut fb = multiboot_fb::get_framebuffer(multiboot_struct);
     fb.boot_message();
     loop {}
 }
