@@ -137,9 +137,6 @@ impl Framebuffer {
                 "Welcome to Oreneta :D\nMade by Segfault, Poyo, Jake and Elijah with lots of <3.",
                 0xFFFFFF,
             );
-            self.print_logo(0xFFFFFF);
-            self.print_logo(0xFFFFFF);
-            self.print_logo(0xFFFFFF);
 
     }
 }
