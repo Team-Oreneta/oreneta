@@ -60,32 +60,28 @@ impl Framebuffer {
         }
     }
 
-    // Print a string to the framebuffer
     pub fn print_string(&mut self, text: &str, color: u32) {
         self.cursor_x = 0;
-            for c in text.chars() {
-                // Stop printing if we exceed the screen self.height
-                if self.cursor_y + 8 > self.height + self.scroll_y {
-                    self.scroll_up(8, self.bg_color);
+        let lines = text.split('\n');
+        for line in lines {
+            for c in line.chars() {
+                // Stop printing if we exceed the screen height
+                if self.cursor_y + LINE_SPACING > self.height + self.scroll_y {
+                    self.scroll_up(LINE_SPACING, self.bg_color);
                 }
-
-                if c == '\n' {
-                    *&mut self.cursor_x = 0;
-                    *&mut self.cursor_y += LINE_SPACING;
-                } else {
-                    self.draw_char(self.cursor_x, self.cursor_y, c, color);
-                    *&mut self.cursor_x += 8;
-
-                    // Wrap to the next line if we exceed the screen self.width
-                    if self.cursor_x >= self.width {
-                        *&mut self.cursor_x = 0;
-                        *&mut self.cursor_y += LINE_SPACING;
-                    }
+    
+                self.draw_char(self.cursor_x, self.cursor_y, c, color);
+                self.cursor_x += 8;
+    
+                // Move to the next line if we exceed the screen width
+                if self.cursor_x + 8 > self.width {
+                    self.cursor_x = 0;
+                    self.cursor_y += LINE_SPACING;
                 }
-
-                // Debug: Track cursor position
-                // Comment out in release builds
-                // println!("&mut self.cursor_x: {}, &mut self.cursor_y: {}", &mut self.cursor_x, &mut self.cursor_y);
+            }
+            // Move to the next line after finishing the current line
+            self.cursor_x = 0;
+            self.cursor_y += LINE_SPACING;
         }
     }
 
