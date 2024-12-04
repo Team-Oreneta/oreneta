@@ -1,5 +1,5 @@
 ARCH := i686
-TARGET := debug
+TARGET := release
 
 LDFILE := config/linker.ld
 LD := clang -target $(ARCH)-elf
@@ -25,7 +25,7 @@ build/kernel.bin: rustbuild $(ASM_OBJ_FILES)
 	$(LD) -T $(LDFILE) -o $@ -ffreestanding -nostdlib $(ASM_OBJ_FILES) $(LIB_PATH) -lgcc
 
 rustbuild:
-	cargo build
+	cargo build --release
 
 clean:
 	rm -rf build

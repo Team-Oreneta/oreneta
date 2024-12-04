@@ -39,5 +39,7 @@ pub fn get_framebuffer(
         height: s.height as usize,
         cursor_x: 0,
         cursor_y: 0,
+        scroll_y: 0,
+        bg_color: 0x111111u32,
     }
 }

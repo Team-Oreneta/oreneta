@@ -7,8 +7,10 @@ pub struct Framebuffer {
     pub framebuffer: *mut u32,
     pub width: usize,
     pub height: usize,
+    pub scroll_y: usize,
     pub cursor_y: usize,
     pub cursor_x: usize,
+    pub bg_color: u32,
 }
 
 impl Framebuffer {
@@ -19,6 +21,23 @@ impl Framebuffer {
             ptr::write_volatile(self.framebuffer.add(y * self.width + x), color);
         }
         // }
+    }
+
+    fn scroll_up(&mut self, lines: usize, color: u32) {
+        for y in 0..self.height - lines {
+            for x in 0..self.width {
+                let color = unsafe { ptr::read_volatile(self.framebuffer.add((y + lines) * self.width + x)) };
+                self.draw_pixel(x, y, color);
+            }
+        }
+
+        for y in self.height - lines..self.height {
+            for x in 0..self.width {
+                self.draw_pixel(x, y, color);
+            }
+        }
+        self.scroll_y += lines;
+        self.cursor_y -= lines;
     }
 
     fn draw_rectangle(&self, x: usize, y: usize, width: usize, height: usize, color: u32) {
@@ -46,8 +65,8 @@ impl Framebuffer {
         self.cursor_x = 0;
             for c in text.chars() {
                 // Stop printing if we exceed the screen self.height
-                if self.cursor_y + 8 > self.height {
-                    break;
+                if self.cursor_y + 8 > self.height + self.scroll_y {
+                    self.scroll_up(8, self.bg_color);
                 }
 
                 if c == '\n' {
@@ -122,5 +141,9 @@ impl Framebuffer {
                 "Welcome to Oreneta :D\nMade by Segfault, Poyo, Jake and Elijah with lots of <3.",
                 0xFFFFFF,
             );
+            self.print_logo(0xFFFFFF);
+            self.print_logo(0xFFFFFF);
+            self.print_logo(0xFFFFFF);
+
     }
 }
