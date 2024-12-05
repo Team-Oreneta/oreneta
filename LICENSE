@@ -1,21 +1,94 @@
-MIT License
+Open Source Creator's Share License for Teams (OSCSL-T-1.0)
+Version: 1.0
+Effective Date: 11/29/24  
 
-Copyright (c) 2024 Luca Tamagnini
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Definitions
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+"Work": The software, content, or other creative material licensed under this agreement.  
+"You": Any individual or entity accessing, using, modifying, or distributing the Work under this license.  
+"Creator": The original author(s) of the Work, as identified in its metadata or documentation.  
+"Team": A group of individuals collaborating on the Work, whether in-person, remotely, or both.  
+"Commercial Use": The sale, offering for sale, or use of the Work or its derivatives for monetary gain or commercial advantage.  
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+
+License Terms
+Attribution (BY)
+You must provide clear attribution to the Creator and contributors in any distribution, display, or modification of the Work. This includes:  
+
+
+The Creator's name and, if applicable, the names of significant contributors or teams.  
+A link to the original source or repository, if available.  
+A statement of any changes made if the Work is modified.  
+
+Share-Alike (SA)
+If you create derivative works based on the Work, you must license them under the same terms as this license.  
+
+Collaboration Rules (CR)
+
+
+Team Records:  
+
+
+Teams must maintain a record of contributors, modifications, and their contributions, accessible to all team members.  
+For local in-person teams, this can include physical logs or shared documentation systems.  
+For remote teams, version-controlled repositories (e.g., Git) or similar platforms should be used.  
+
+
+
+Attribution for Teams:  
+
+
+Attribution must acknowledge the Team’s collective effort alongside the Creator.  
+Local teams may attribute via organization names or project-specific credits, while remote teams must include repository links or individual acknowledgments.  
+
+
+
+Conflict Resolution:  
+
+
+Disputes within local or remote teams over contributions or rights must be resolved internally and documented before publicizing or distributing the Work.  
+
+
+
+Commercial Use (CU)
+You may only use the Work or its derivatives for Commercial Use under the following conditions:  
+
+
+Explicit written consent from the Creator or a designated Team representative must be obtained.  
+The Creator and Team retain joint exclusive rights to use and commercialize the Work unless otherwise agreed upon.  
+Revenue-sharing agreements must be documented and agreed upon by all contributing Team members.  
+
+Hybrid Collaboration (HC)
+
+
+For teams combining local and remote members:  
+
+
+Communication tools (e.g., video conferencing, collaborative documents) must be used to ensure equal participation.  
+Documentation of contributions should bridge both local and remote activities.  
+
+
+
+Teams operating across multiple jurisdictions must comply with applicable intellectual property and labor laws for all members.  
+
+
+
+No Warranty (NW)
+The Work is provided "as is," without any warranty, express or implied. Neither the Creator nor Team members are responsible for damages or losses arising from the use or inability to use the Work.  
+
+
+Termination
+This license is effective until terminated. Your rights under this license automatically terminate if you violate any of its terms. The Creator or Team may pursue legal action for violations.  
+
+
+Governing Law
+This license shall be governed by the laws of The United States of America, or by the jurisdiction agreed upon by the Team if applicable.  
+
+
+How to Apply This License
+To apply the OSCSL-T-1.0 to your work, include the following notice in your project:  
+
+This work is licensed under the Open Source Creator's Share License for Teams (OSCSL-T-1.0).
+For details, see https://protectopensource.org or contact jake@protectopensource.org.
+For commercial use, contact admin@poyoweb.org.  
