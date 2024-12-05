@@ -132,6 +132,8 @@ impl Framebuffer {
             "Oreneta Booting Up!",
             0xFFFFFF,
         );
+    }
+    pub fn boot_message_loaded(&mut self) {
         self.print_logo(0xFFFFFF);
         self.print_string(
             "Welcome to Oreneta :D\nMade by Segfault, Poyo, Jake and Elijah with lots of <3.",

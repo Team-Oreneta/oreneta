@@ -21,5 +21,6 @@ pub extern "C" fn kmain(info_ptr: PAddr) -> ! {
     let multiboot_struct = multiboot_fb::use_multiboot(info_ptr);
     let mut fb = multiboot_fb::get_framebuffer(multiboot_struct);
     fb.boot_message();
+    fb.boot_message_loaded();
     loop {}
 }
