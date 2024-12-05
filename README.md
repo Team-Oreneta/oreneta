@@ -30,3 +30,8 @@ After installing **Rust**, do:
 ## Building
 
 To build, simply run `make`. This will compile the Rust into a static library, compile the assembly, and then link with `clang`. It then uses `grub-mkrescue` to generate an ISO file. You can also run `make run` to run the code in QEMU.
+
+
+This work is licensed under the Open Source Creator's Share License for Teams (OSCSL-T-1.0).
+For details, see https://protectopensource.org or contact jake@protectopensource.org.
+For commercial use, contact admin@poyoweb.org.  
