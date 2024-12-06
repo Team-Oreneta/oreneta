@@ -6,7 +6,7 @@ Oreneta is a free and open source operating system kernel (and maybe someday, a 
 
 First, you need to install a couple of dependencies. On Debian or Debian based distros, you can run `apt install base-devel nasm xorriso llvm-tools clang` as root to install. 
 
-On Arch Linux, you can run `sudo pacman -S base-devel xorriso mtools nasm qemu`. 
+On Arch Linux, you can run `sudo pacman -S base-devel xorriso mtools nasm qemu-full`. 
 
 On Mac you install install using [Brew](https://brew.sh/) and xcode tools. Install xcode tools with: 'xcode-select --install' then install the rest of the dependencies with brew. Verfiy the installation with:
 
