@@ -1,4 +1,4 @@
-#[repr(C, packed(2))]
+#[repr(C, packed)]
 #[derive(Copy, Clone)]
 struct IdtEntry {
     base_low: u16,
@@ -43,7 +43,7 @@ extern "C" {
     fn load_idt();
 }
 
-fn idt_set_gate(num: u8, base: u32, sel: u16, flags: u8) {
+pub fn idt_set_gate(num: u8, base: u32, sel: u16, flags: u8) {
     unsafe {
         IDT[num as usize] = IdtEntry {
             base_low: (base & 0xFFFF) as u16,

@@ -1,6 +1,6 @@
 use core::{mem, ptr};
 
-#[repr(C, packed(2))]
+#[repr(C, packed)]
 struct GdtEntry {
     limit_low: u16,
     base_low: u16,
@@ -15,7 +15,7 @@ struct GdtPtr {
     limit: u16,
     base: u32,
 }
-static mut GDT: [GdtEntry; 3] = [
+static GDT: [GdtEntry; 3] = [
     GdtEntry::new(0, 0, 0, 0),
     GdtEntry::new(0, 0xFFFFFFFF, 0x9A, 0xCF),
     GdtEntry::new(0, 0xFFFFFFFF, 0x92, 0xCF),

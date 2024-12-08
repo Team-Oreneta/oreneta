@@ -1,7 +1,18 @@
 use core::ptr;
+use core::fmt;
 use font8x8::legacy::BASIC_LEGACY;
 
 const LINE_SPACING: usize = 12;
+
+pub static mut FB: Framebuffer = Framebuffer {
+    framebuffer: core::ptr::null_mut(),
+    width: 0,
+    height: 0,
+    scroll_y: 0,
+    cursor_y: 0,
+    cursor_x: 0,
+    bg_color: 0,
+};
 
 pub struct Framebuffer {
     pub framebuffer: *mut u32,
@@ -11,6 +22,12 @@ pub struct Framebuffer {
     pub cursor_y: usize,
     pub cursor_x: usize,
     pub bg_color: u32,
+}
+
+pub fn set_default_framebuffer(new_framebuffer: Framebuffer) {
+    unsafe {
+        FB = new_framebuffer;
+    }
 }
 
 impl Framebuffer {
@@ -60,29 +77,26 @@ impl Framebuffer {
         }
     }
 
+    pub fn print(&mut self, text: &str, color: u32) {
+        let lines = text.split('\n');
+        for c in text.chars() {
+            if self.cursor_y + LINE_SPACING > self.height + self.scroll_y {
+                self.scroll_up(LINE_SPACING, self.bg_color);
+            }
+
+            self.draw_char(self.cursor_x, self.cursor_y, c, color);
+            self.cursor_x += 8;
+            if self.cursor_x + 8 > self.width || c == '\n' {
+                self.cursor_x = 0;
+                self.cursor_y += LINE_SPACING;
+            }
+        }
+    }
     pub fn print_string(&mut self, text: &str, color: u32) {
         self.cursor_x = 0;
-        let lines = text.split('\n');
-        for line in lines {
-            for c in line.chars() {
-                // Stop printing if we exceed the screen height
-                if self.cursor_y + LINE_SPACING > self.height + self.scroll_y {
-                    self.scroll_up(LINE_SPACING, self.bg_color);
-                }
-    
-                self.draw_char(self.cursor_x, self.cursor_y, c, color);
-                self.cursor_x += 8;
-    
-                // Move to the next line if we exceed the screen width
-                if self.cursor_x + 8 > self.width {
-                    self.cursor_x = 0;
-                    self.cursor_y += LINE_SPACING;
-                }
-            }
-            // Move to the next line after finishing the current line
-            self.cursor_x = 0;
-            self.cursor_y += LINE_SPACING;
-        }
+        self.print(text, color);
+        self.cursor_x = 0;
+        self.cursor_y += LINE_SPACING;
     }
 
     // Print the logo to the framebuffer
@@ -136,8 +150,15 @@ impl Framebuffer {
     pub fn boot_message_loaded(&mut self) {
         self.print_logo(0xFFFFFF);
         self.print_string(
-            "Welcome to Oreneta :D\nMade by Segfault, Poyo, Jake and Elijah with lots of <3.",
+            "Welcome to Oreneta :D\nMade by Segfault, Poyo, Jake and Elijah with lots of <3.\n",
             0xFFFFFF,
         );
+    }
+}
+
+impl fmt::Write for Framebuffer {
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        self.print(s, 0xFFFFFF);
+        Ok(())
     }
 }
