@@ -14,6 +14,7 @@ mod isrs;
 mod irq;
 mod system;
 mod ports;
+mod timer;
 mod text;
 
 #[panic_handler]
@@ -28,6 +29,7 @@ pub unsafe extern "C" fn kmain(info_ptr: PAddr) -> ! {
     idt::init_idt();
     isrs::init_isrs();
     irq::init_irqs();
+    timer::init_timer();
 
     let multiboot_struct = multiboot_fb::use_multiboot(info_ptr);
     let fb = multiboot_fb::get_framebuffer(multiboot_struct);
