@@ -32,6 +32,7 @@ pub fn set_default_framebuffer(new_framebuffer: Framebuffer) {
 
 impl Framebuffer {
     // Draw a pixel at (x, y) with the specified color
+    #[inline(always)]
     fn draw_pixel(&self, x: usize, y: usize, color: u32) {
         // if x < self.width && y < self.height {
         unsafe {
