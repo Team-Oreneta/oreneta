@@ -16,6 +16,7 @@ mod system;
 mod ports;
 mod timer;
 mod text;
+mod keyboard;
 
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
@@ -30,6 +31,7 @@ pub unsafe extern "C" fn kmain(info_ptr: PAddr) -> ! {
     isrs::init_isrs();
     irq::init_irqs();
     timer::init_timer();
+    keyboard::init_keyboard();
 
     let multiboot_struct = multiboot_fb::use_multiboot(info_ptr);
     let fb = multiboot_fb::get_framebuffer(multiboot_struct);

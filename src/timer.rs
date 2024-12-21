@@ -21,10 +21,6 @@ fn timer_handler(r: *const system::Registers) {
     unsafe {
         /* Increment our 'tick count' */
         timer_ticks += 1;
-
-        if (timer_ticks % FREQUENCY == 0) {
-            write!(text::FB, "Another second has passed ({} ticks)\n", timer_ticks);
-        }
     }
 }
 
