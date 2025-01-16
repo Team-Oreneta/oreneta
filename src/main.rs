@@ -7,16 +7,16 @@
 use core::panic::PanicInfo;
 use multiboot::information::PAddr;
 
-mod multiboot_fb;
 mod gdt;
 mod idt;
-mod isrs;
 mod irq;
-mod system;
-mod ports;
-mod timer;
-mod text;
+mod isrs;
 mod keyboard;
+mod multiboot_fb;
+mod ports;
+mod system;
+mod text;
+mod timer;
 
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
