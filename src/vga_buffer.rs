@@ -1,5 +1,6 @@
 use volatile::Volatile;
 
+// Define the color codes for the VGA text mode
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -22,6 +23,7 @@ pub enum Color {
     White = 15,
 }
 
+// Wrapper for combining foreground and background colors
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(transparent)]
 struct ColorCode(u8);
@@ -32,6 +34,7 @@ impl ColorCode {
     }
 }
 
+// Represents a single character on the screen with its color code
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(C)]
 struct ScreenChar {
@@ -42,11 +45,13 @@ struct ScreenChar {
 const BUFFER_HEIGHT: usize = 25;
 const BUFFER_WIDTH: usize = 80;
 
+// Represents the VGA buffer
 #[repr(transparent)]
 struct Buffer {
     chars: [[Volatile<ScreenChar>; BUFFER_WIDTH]; BUFFER_HEIGHT],
 }
 
+// Handle writing to the VGA buffer
 pub struct Writer {
     column_position: usize,
     color_code: ColorCode,
@@ -54,12 +59,13 @@ pub struct Writer {
 }
 
 impl Writer {
+    // Write a single byte to the buffer
     pub fn write_byte(&mut self, byte: u8) {
         match byte {
-            b'\n' => self.new_line(),
+            b'\n' => self.new_line(), // Handle newline
             byte => {
                 if self.column_position >= BUFFER_WIDTH {
-                    self.new_line();
+                    self.new_line(); // Move to new line if at the end of the current line
                 }
 
                 let row = BUFFER_HEIGHT - 1;
@@ -75,11 +81,12 @@ impl Writer {
         }
     }
 
+
     fn new_line(&mut self) {/* TODO */}
 }
 
-
 impl Writer {
+    // Write a string to the buffer
     pub fn write_string(&mut self, s: &str) {
         for byte in s.bytes() {
             match byte {
@@ -88,7 +95,6 @@ impl Writer {
                 // not part of printable ASCII range
                 _ => self.write_byte(0xfe),
             }
-
         }
     }
 }
@@ -96,11 +102,13 @@ impl Writer {
 use core::fmt;
 
 impl fmt::Write for Writer {
+    // Implement the `write_str` method for `fmt::Write`
     fn write_str(&mut self, s: &str) -> fmt::Result {
         self.write_string(s);
         Ok(())
     }
 }
+
 
 pub fn print_something() {
     use core::fmt::Write;

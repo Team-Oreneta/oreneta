@@ -4,6 +4,7 @@ use font8x8::legacy::BASIC_LEGACY;
 
 const LINE_SPACING: usize = 12;
 
+// Framebuffer static instance
 pub static mut FB: Framebuffer = Framebuffer {
     framebuffer: core::ptr::null_mut(),
     width: 0,
@@ -14,6 +15,7 @@ pub static mut FB: Framebuffer = Framebuffer {
     bg_color: 0,
 };
 
+// Framebuffer structure definition
 pub struct Framebuffer {
     pub framebuffer: *mut u32,
     pub width: usize,
@@ -24,6 +26,7 @@ pub struct Framebuffer {
     pub bg_color: u32,
 }
 
+// Set the default framebuffer
 pub fn set_default_framebuffer(new_framebuffer: Framebuffer) {
     unsafe {
         FB = new_framebuffer;
@@ -34,13 +37,12 @@ impl Framebuffer {
     // Draw a pixel at (x, y) with the specified color
     #[inline(always)]
     fn draw_pixel(&self, x: usize, y: usize, color: u32) {
-        // if x < self.width && y < self.height {
         unsafe {
             ptr::write_volatile(self.framebuffer.add(y * self.width + x), color);
         }
-        // }
     }
 
+    // Scroll the framebuffer up by a number of lines
     fn scroll_up(&mut self, lines: usize, color: u32) {
         for y in 0..self.height - lines {
             for x in 0..self.width {
@@ -58,6 +60,7 @@ impl Framebuffer {
         self.cursor_y -= lines;
     }
 
+    // Draw a rectangle at (x, y) with the specified width, height, and color
     fn draw_rectangle(&self, x: usize, y: usize, width: usize, height: usize, color: u32) {
         for i in 0..width {
             for j in 0..height {
@@ -78,6 +81,7 @@ impl Framebuffer {
         }
     }
 
+    // Print text to the framebuffer
     pub fn print(&mut self, text: &str, color: u32) {
         let lines = text.split('\n');
         for c in text.chars() {
@@ -93,6 +97,8 @@ impl Framebuffer {
             }
         }
     }
+
+    // Print a string to the framebuffer and move to the next line
     pub fn print_string(&mut self, text: &str, color: u32) {
         self.cursor_x = 0;
         self.print(text, color);
@@ -127,10 +133,11 @@ impl Framebuffer {
 
         // Print the logo
         self.print_string(logo, color);
-        // Reset cursor position after printing the logo
+        // Reset cursor position
         self.cursor_x = 0;
     }
 
+    // Fill the screen with stripes of colors
     fn fill_screen(&self, colors: &[u32]) {
         let num_colors = colors.len();
         let stripe_height = self.height / num_colors;
@@ -139,7 +146,7 @@ impl Framebuffer {
         }
     }
 
-    // Boot message with the logo
+    // Display the boot message with the logo
     pub fn boot_message(&mut self) {
         self.fill_screen(&[0x050505, 0x111111, 0x121212, 0x222222, 0x232323, 0x333333]);
         self.fill_screen(&[0x111111]);
@@ -148,6 +155,8 @@ impl Framebuffer {
             0xFFFFFF,
         );
     }
+
+    // Display the boot message after loading
     pub fn boot_message_loaded(&mut self) {
         self.print_logo(0xFFFFFF);
         self.print_string(
@@ -157,6 +166,7 @@ impl Framebuffer {
     }
 }
 
+// Implement the fmt::Write trait for Framebuffer
 impl fmt::Write for Framebuffer {
     fn write_str(&mut self, s: &str) -> fmt::Result {
         self.print(s, 0xFFFFFF);

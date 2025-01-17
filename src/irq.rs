@@ -22,10 +22,13 @@ extern "C" {
     fn irq15();
 }
 
+// Type alias for IRQ handler function
 type IrqFn = fn(*const system::Registers);
 
+// Array to store IRQ handlers
 static mut IRQ_HANDLERS: [Option<IrqFn>; 16] = [None; 16];
 
+// Function to install an IRQ handler
 pub fn install_handler(index: usize, function: IrqFn) {
     if index > 15 {
         panic!("Bad error!");
@@ -35,12 +38,14 @@ pub fn install_handler(index: usize, function: IrqFn) {
     }
 }
 
+// Function to uninstall an IRQ handler
 pub fn uninstall_handler(index: usize) {
     unsafe {
         IRQ_HANDLERS[index] = None;
     }
 }
 
+// Remap IRQs
 fn remap() {
     unsafe {
         ports::outb(0x20, 0x11);
@@ -56,6 +61,7 @@ fn remap() {
     }
 }
 
+// initialize IRQs
 pub fn init_irqs() {
     remap();
     idt::idt_set_gate(32, irq0 as u32, 0x08, 0x8E);
@@ -81,14 +87,16 @@ pub fn init_irqs() {
     }
 }
 
+// IRQ handler function
 #[no_mangle]
 fn irq_handler(r: *const system::Registers) {
     unsafe {
+        // Call the registered handler if it exists
         if let Some(handler) = &IRQ_HANDLERS[((*r).int_no - 32) as usize] {
             handler(r);
         }
 
-        //If the IRQ invoked was IRQ8 - 15, send an EOI to the slave controller
+        // If the IRQ invoked was IRQ8 - 15, send an EOI to the slave controller
         if (*r).int_no >= 40 {
             ports::outb(0xA0, 0x20);
         }

@@ -2,6 +2,7 @@ use core::fmt::Write;
 use crate::idt;
 use crate::text;
 
+// External ISR function declarations
 extern "C" {
     fn isr0();
     fn isr1();
@@ -37,7 +38,9 @@ extern "C" {
     fn isr31();
 }
 
+// Initialize ISRs
 pub fn init_isrs() {
+    // Set IDT gates for each ISR
     idt::idt_set_gate(0, isr0 as u32, 0x08, 0x8E);
     idt::idt_set_gate(1, isr1 as u32, 0x08, 0x8E);
     idt::idt_set_gate(2, isr2 as u32, 0x08, 0x8E);
@@ -75,6 +78,7 @@ pub fn init_isrs() {
     idt::idt_set_gate(31, isr31 as u32, 0x08, 0x8E);
 }
 
+// Registers structure to hold CPU state
 #[repr(C, packed)]
 struct Registers {
     gs: u32,
@@ -98,6 +102,7 @@ struct Registers {
     ss: u32,
 }
 
+// Error messages corresponding to ISR numbers
 const ERRS: [&str;32] = [
     "Division By Zero",
     "Debug",
@@ -136,6 +141,7 @@ const ERRS: [&str;32] = [
     "Reserved"
 ];
 
+// Fault handler function
 #[no_mangle]
 fn fault_handler(r: Registers) {
     let int_no = r.int_no;

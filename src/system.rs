@@ -20,3 +20,5 @@ pub struct Registers {
     pub useresp: u32,
     pub ss: u32,
 }
+
+// way too over my head, sorry Seg -J
