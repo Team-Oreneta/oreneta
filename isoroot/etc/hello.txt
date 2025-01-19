@@ -1,0 +1,3 @@
+Welcome to the Oreneta operating system!
+
+This is a file stored on the initial ramdisk.

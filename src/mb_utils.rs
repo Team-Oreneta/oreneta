@@ -1,4 +1,4 @@
-use multiboot::information::{MemoryManagement, Multiboot, PAddr};
+use multiboot::information::{MemoryManagement, Module, Multiboot, PAddr};
 use core::{mem, slice};
 use crate::text::Framebuffer;
 
@@ -33,7 +33,7 @@ pub fn use_multiboot(info_ptr: PAddr) -> Multiboot<'static, 'static> {
 
 // Retrieve framebuffer information from Multiboot
 pub fn get_framebuffer(
-    multiboot_struct: Multiboot<'static, 'static>,
+    multiboot_struct: &Multiboot<'static, 'static>,
 ) -> Framebuffer {
     let s = multiboot_struct
         .framebuffer_table()
@@ -47,4 +47,9 @@ pub fn get_framebuffer(
         scroll_y: 0,
         bg_color: 0x111111u32,
     }
+}
+
+pub fn get_module(multiboot_struct: &Multiboot<'static, 'static>) -> u32 {
+    (*multiboot_struct.modules().unwrap().next().as_mut().unwrap()).start as u32 // as *mut Module as u32
+    //  1
 }
