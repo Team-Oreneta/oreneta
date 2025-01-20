@@ -4,7 +4,7 @@ Oreneta is a free and open source operating system kernel (and maybe someday, a 
 
 ## Dependencies
 
-First, you need to install a couple of dependencies. On Debian or Debian based distros, you can run `apt install base-devel nasm xorriso llvm-tools clang` as root to install. 
+First, you need to install a couple of dependencies. On Debian or Debian based distros, you can run `apt install build-essential nasm xorriso llvm clang` as root to install. 
 
 On Arch Linux, you can run `sudo pacman -S base-devel xorriso mtools nasm qemu-full`. 
 
