@@ -4,6 +4,7 @@
 // // Note that we do NOT have a VFS abstraction. That will be
 // // needed later, so TODO.
 
+use core::array;
 use core::ptr;
 use core::ffi::CStr;
 use core::ffi::c_void;
@@ -69,10 +70,10 @@ impl UStarHeader {
 
     pub unsafe fn write_contents(&self) {
         let mut i = 0;
-
-        let address = self.get_contents_address();
-        while i < self.read_size() {
-            write!(text::FB, "{}", *(address.add(i) as *const char));
+        let size = self.read_size();
+        let bytes = core::slice::from_raw_parts(self.get_contents_address(), size);
+        while i < size {
+            write!(text::FB, "{}", bytes[i] as char);
             i += 1;
         }
     }
