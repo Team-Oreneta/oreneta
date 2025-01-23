@@ -4,12 +4,9 @@
 // // Note that we do NOT have a VFS abstraction. That will be
 // // needed later, so TODO.
 
-use core::array;
-use core::ptr;
 use core::ffi::CStr;
 use core::ffi::c_void;
-use core::fmt::Write;
-use crate::text;
+use crate::print;
 
 #[repr(C, packed)]
 pub struct UStarHeader {
@@ -73,7 +70,7 @@ impl UStarHeader {
         let size = self.read_size();
         let bytes = core::slice::from_raw_parts(self.get_contents_address(), size);
         while i < size {
-            write!(text::FB, "{}", bytes[i] as char);
+            print!("{}", bytes[i] as char);
             i += 1;
         }
     }

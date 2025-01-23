@@ -3,10 +3,11 @@
 #![no_std]
 #![no_main]
 
-use core::{ffi::c_char, panic::PanicInfo};
+use core::panic::PanicInfo;
 use fs::tar::Ramdisk;
 use multiboot::information::PAddr;
 
+mod framebuffer;
 mod gdt;
 mod idt;
 mod irq;
@@ -18,13 +19,11 @@ mod system;
 mod fs;
 mod text;
 mod timer;
-use core::fmt::Write;
-
 
 // Define the panic handler function
 #[panic_handler]
 unsafe fn panic(info: &PanicInfo) -> ! {
-    write!(text::FB,"{}", info);
+    println!("{}", info);
 
     loop {}
 }
@@ -51,17 +50,18 @@ pub unsafe extern "C" fn kmain(info_ptr: PAddr) -> ! {
 
 
     // Display boot messages
-    text::FB.boot_message();
-    text::FB.boot_message_loaded();
+    text::WRITER.lock().boot_message();
+    text::WRITER.lock().boot_message_loaded();
 
     // Create the initial ramdisk
     let initrd = Ramdisk::new(initrd_address);
 
     let file = initrd.get_file("./etc/hello.txt").unwrap();
-    write!(text::FB, "SIZE: {}, CONTENTS:\n", file.read_name());
+    println!("SIZE: {}, CONTENTS:", file.read_name());
     
     file.write_contents();
 
+    println!("This is a test!");
     // Infinite loop to keep the kernel running
     loop {}
 }

@@ -1,5 +1,5 @@
 ARCH := i686
-TARGET := release
+TARGET := debug
 
 LDFILE := config/linker.ld
 LD := clang -target $(ARCH)-elf
@@ -29,13 +29,17 @@ build/initrd: isoroot/
 	tar -H ustar -C $< -cf $@ .
 
 rustbuild:
-	cargo build --release
+	@if [ "$(TARGET)" == "release" ]; then \
+		cargo build --release; \
+	else \
+		cargo build; \
+	fi
 
 clean:
 	rm -rf build
 	cargo clean
 
 build/arch/$(ARCH)/asm/%.o: src/arch/$(ARCH)/asm/%.asm
-	mkdir -p $(shell dirname $@)
-	echo "[ASM] $<"
-	nasm -felf32 $< -o $@
+	@mkdir -p $(shell dirname $@)
+	@echo "[ASM] $<"
+	@nasm -felf32 $< -o $@

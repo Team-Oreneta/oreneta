@@ -14,6 +14,7 @@ pub unsafe fn inb(port: u16) -> u8 {
     ret
 }
 
+#[allow(dead_code)]
 #[inline]
 pub unsafe fn inw(port: u16) -> u16 {
     // Read a word from the specified port

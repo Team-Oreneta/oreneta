@@ -1,3 +1,5 @@
+// Registers structure to hold CPU state
+
 #[repr(C, packed)]
 pub struct Registers {
     pub gs: u32,
@@ -20,5 +22,3 @@ pub struct Registers {
     pub useresp: u32,
     pub ss: u32,
 }
-
-// way too over my head, sorry Seg -J

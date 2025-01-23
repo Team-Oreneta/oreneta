@@ -37,7 +37,7 @@ fn init_idt_ptr() {
     unsafe {
         IDT_PTR = IdtPtr {
             limit: (core::mem::size_of::<[IdtEntry; 256]>() - 1) as u16,
-            base: IDT.as_ptr() as u32, // Base address of the IDT
+            base: &raw const IDT as u32, // Base address of the IDT
         };
     }
 }

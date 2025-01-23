@@ -1,4 +1,4 @@
-use core::{mem, ptr};
+use core::mem;
 
 //Lots of comments here, this is confusing stuff
 
@@ -29,7 +29,7 @@ static GDT: [GdtEntry; 3] = [
 
 // Define a mutable static GDT pointer
 #[no_mangle]
-pub static mut GP: GdtPtr = GdtPtr { base: 0, limit: 0 };
+static mut GP: GdtPtr = GdtPtr { base: 0, limit: 0 };
 
 // Declare an external function to flush the GDT
 extern "C" {

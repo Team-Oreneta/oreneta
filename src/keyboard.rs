@@ -1,8 +1,9 @@
+#[allow(dead_code)]
+
 use crate::irq;
 use crate::ports;
+use crate::print;
 use crate::system;
-use crate::text;
-use core::fmt::Write;
 
 // Define the US keyboard layout
 const KEYBOARD_US: [u8; 128] = [
@@ -24,7 +25,7 @@ const KEYBOARD_US_SHIFTED: [u8; 128] = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 ];
 
-// Define function pointers for special keys
+// Define function pointers for keys
 static mut KEYBOARD_US_FNS: [fn(scancode: u8); 128] = [
     unused, unused, other, other, other, other, other, other, other, other, other, other, other,
     other, unused, other, other, other, other, other, other, other, other, other, other, other,
@@ -46,8 +47,8 @@ struct KeyboardState {
     ctrl: bool,
 }
 
-// Initialize the keyboard state
-static mut state: KeyboardState = KeyboardState {
+// Initialize the global keyboard state
+static mut STATE: KeyboardState = KeyboardState {
     alt: false,
     shift: false,
     ctrl: false,
@@ -57,30 +58,27 @@ static mut state: KeyboardState = KeyboardState {
 fn keyboard_putchar(c: char) {
     // When we implement input functions, this is
     // where the code will go.
-    unsafe {
-        write!(text::FB, "{}", c).unwrap();
-    }
+    print!("{}", c);
 }
 
 // Function to handle Alt key press
-fn alt(scancode: u8) {
+fn alt(_scancode: u8) {
     unsafe {
-        state.alt = !state.alt;
-        write!(text::FB, "ALT");
+        STATE.alt = !STATE.alt;
     }
 }
 
 // Function to handle Ctrl key press
-fn ctrl(scancode: u8) {
+fn ctrl(_scancode: u8) {
     unsafe {
-        state.ctrl = !state.ctrl;
+        STATE.ctrl = !STATE.ctrl;
     }
 }
 
 // Function to handle Shift key press
-fn shift(scancode: u8) {
+fn shift(_scancode: u8) {
     unsafe {
-        state.shift = !state.shift;
+        STATE.shift = !STATE.shift;
     }
 }
 
@@ -92,9 +90,9 @@ fn other(scancode: u8) {
             return;
         } else if KEYBOARD_US[scancode as usize] == 0u8 {
             return;
-        } else if state.shift {
+        } else if STATE.shift {
             keyboard_putchar(KEYBOARD_US_SHIFTED[scancode as usize] as char);
-        } else if state.ctrl {
+        } else if STATE.ctrl {
             keyboard_putchar('^');
             keyboard_putchar(KEYBOARD_US_SHIFTED[scancode as usize] as char);
         } else {
@@ -104,11 +102,12 @@ fn other(scancode: u8) {
 }
 
 // Function for unused keys
-fn unused(scancode: u8) {
+fn unused(_scancode: u8) {
     // This function is called when a key that is not a character
     // is pressed, but is not mapped to any other function.
 }
 
+#[allow(dead_code)]
 // Function to map a key to a function
 pub fn map_key(scancode: u8, function: fn(u8)) {
     // Maps a key to a function. The function should
@@ -120,7 +119,7 @@ pub fn map_key(scancode: u8, function: fn(u8)) {
 }
 
 // Handles the keyboard interrupt, IRQ 1
-fn keyboard_handler(r: *const system::Registers) {
+fn keyboard_handler(_r: *const system::Registers) {
     let scancode: u8;
     unsafe {
         scancode = ports::inb(0x60);

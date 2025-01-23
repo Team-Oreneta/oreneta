@@ -1,6 +1,6 @@
-use core::fmt::Write;
 use crate::idt;
-use crate::text;
+use crate::println;
+use crate::system;
 
 // External ISR function declarations
 extern "C" {
@@ -78,30 +78,6 @@ pub fn init_isrs() {
     idt::idt_set_gate(31, isr31 as u32, 0x08, 0x8E);
 }
 
-// Registers structure to hold CPU state
-#[repr(C, packed)]
-struct Registers {
-    gs: u32,
-    fs: u32,
-    es: u32, 
-    ds: u32,
-    edi: u32, 
-    esi: u32, 
-    ebp: u32,
-    esp: u32, 
-    ebx: u32,
-    edx: u32,
-    ecx: u32, 
-    eax: u32,
-    int_no: u32,
-    err_code: u32,
-    eip: u32,
-    cs: u32,
-    eflags: u32,
-    useresp: u32,
-    ss: u32,
-}
-
 // Error messages corresponding to ISR numbers
 const ERRS: [&str;32] = [
     "Division By Zero",
@@ -143,12 +119,10 @@ const ERRS: [&str;32] = [
 
 // Fault handler function
 #[no_mangle]
-fn fault_handler(r: Registers) {
+fn fault_handler(r: system::Registers) {
     let int_no = r.int_no;
     if int_no < 32 {
-        unsafe {
-            write!(text::FB, "KERNEL PANIC:\nA fatal error occurred and your computer has been halted.\nError code: {}", ERRS[int_no as usize]);
-        }
+        println!("KERNEL PANIC:\nA fatal error occurred and your computer has been halted.\nError code: {}", ERRS[int_no as usize]);
         loop {};
     }
 }

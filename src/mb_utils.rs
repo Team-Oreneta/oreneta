@@ -1,6 +1,6 @@
-use multiboot::information::{MemoryManagement, Module, Multiboot, PAddr};
+use multiboot::information::{MemoryManagement, Multiboot, PAddr};
 use core::{mem, slice};
-use crate::text::Framebuffer;
+use crate::framebuffer::Framebuffer;
 
 // Define a struct for memory management
 struct Mem;
@@ -23,12 +23,14 @@ impl MemoryManagement for Mem {
     }
 }
 
-// Static instance of Mem
+// Static instance of Mem for the memory management of multiboot
 static mut MEM: Mem = Mem;
 
 // Initialize Multiboot
 pub fn use_multiboot(info_ptr: PAddr) -> Multiboot<'static, 'static> {
-    unsafe { Multiboot::from_ptr(info_ptr, &mut MEM).expect("Header error!") }
+    unsafe { Multiboot::from_ptr(
+        info_ptr, &mut MEM
+    ).expect("Header error!") }
 }
 
 // Retrieve framebuffer information from Multiboot
@@ -38,18 +40,15 @@ pub fn get_framebuffer(
     let s = multiboot_struct
         .framebuffer_table()
         .expect("Framebuffer not found!");
-    Framebuffer {
-        framebuffer: s.addr as *mut u32,
-        width: s.width as usize,
-        height: s.height as usize,
-        cursor_x: 0,
-        cursor_y: 0,
-        scroll_y: 0,
-        bg_color: 0x111111u32,
-    }
+
+    Framebuffer::new(
+        s.addr as u32,
+        s.width as usize,
+        s.height as usize,
+    )
 }
 
 pub fn get_module(multiboot_struct: &Multiboot<'static, 'static>) -> u32 {
-    (*multiboot_struct.modules().unwrap().next().as_mut().unwrap()).start as u32 // as *mut Module as u32
-    //  1
+    let mut modules = multiboot_struct.modules().unwrap();
+    modules.next().as_mut().unwrap().start as u32
 }

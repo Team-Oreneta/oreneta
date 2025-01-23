@@ -38,6 +38,7 @@ pub fn install_handler(index: usize, function: IrqFn) {
     }
 }
 
+#[allow(dead_code)]
 // Function to uninstall an IRQ handler
 pub fn uninstall_handler(index: usize) {
     unsafe {
