@@ -14,6 +14,7 @@ mod irq;
 mod isrs;
 mod keyboard;
 mod mb_utils;
+mod oiff;
 mod ports;
 mod system;
 mod fs;
@@ -48,20 +49,20 @@ pub unsafe extern "C" fn kmain(info_ptr: PAddr) -> ! {
     // Find the address of the first module.
     let initrd_address = mb_utils::get_module(&multiboot_struct);
 
-
-    // Display boot messages
-    text::WRITER.lock().boot_message();
-    text::WRITER.lock().boot_message_loaded();
-
     // Create the initial ramdisk
     let initrd = Ramdisk::new(initrd_address);
 
-    let file = initrd.get_file("./etc/hello.txt").unwrap();
-    println!("SIZE: {}, CONTENTS:", file.read_name());
+    // Load the logo from the ramdisk
+    let logo = initrd.get_file("./oreneta-logo.oiff").unwrap();
     
-    file.write_contents();
+    // Display boot messages
+    text::WRITER.lock().boot_message(logo);
+    text::WRITER.lock().boot_message_loaded();
 
-    println!("This is a test!");
+    let test_file = initrd.get_file("./etc/hello.txt").unwrap();
+    println!("The file {}'s length is {}, and the contents are:\n", test_file.read_name(), test_file.read_size());
+    test_file.write_contents();
+
     // Infinite loop to keep the kernel running
     loop {}
 }

@@ -35,4 +35,21 @@ impl Framebuffer {
             }
         }
     }
+
+    pub fn draw_image(&self, x: usize, y: usize, width: usize, height: usize, contents: &[u32]) {
+        for i in 0..width {
+            for j in 0..height {
+                let color = contents[j * width + i];
+                if (color & 0xFF000000) != 0 {
+                    self.draw_pixel(x + i, y + j, color);
+                }
+            }
+        }
+    }
+
+    pub fn get_center_xy(&self, width: usize, height: usize) -> (usize, usize) {
+        let x = (self.width - width) / 2;
+        let y = (self.height - height) / 2;
+        (x, y)
+    }
 }

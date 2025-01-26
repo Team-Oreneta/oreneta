@@ -1,8 +1,10 @@
+use core::arch::asm;
+
 use crate::irq;
 use crate::ports;
 use crate::system;
 
-const FREQUENCY: u32 = 1000; // 1 MHz
+const FREQUENCY: u32 = 1000; // 1 KHz
 static mut TIMER_TICKS: u32 = 0;
 
 fn set_frequency(hz: u32) {
@@ -20,8 +22,17 @@ fn set_frequency(hz: u32) {
 
 fn timer_handler(_r: *const system::Registers) {
     unsafe {
-        /* Increment our 'tick count' */
+        // Increment the number of timer ticks elapsed since start.
         TIMER_TICKS += 1;
+    }
+}
+
+pub fn sleepticks(n_ticks: u32) {
+    unsafe {
+        let start = TIMER_TICKS;
+        while TIMER_TICKS < start + n_ticks {
+            asm!("hlt");
+        }
     }
 }
 
