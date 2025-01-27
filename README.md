@@ -8,7 +8,7 @@ First, you need to install a couple of dependencies. On Debian or Debian based d
 
 On Arch Linux, you can run `sudo pacman -S base-devel xorriso mtools nasm qemu-full`. 
 
-On Mac you install install using [Brew](https://brew.sh/) and xcode tools. Install xcode tools with: 'xcode-select --install' then install the rest of the dependencies with brew. Verfiy the installation with:
+On Mac you can install the dependencies using [Brew](https://brew.sh/) and Xcode tools. You can install Xcode tools with: 'xcode-select --install' then install the rest of the dependencies with Brew (Commands coming soon). Verify the installation with:
 
 ```
 nasm --version
@@ -17,11 +17,11 @@ clang --version
 llvm-config --version
 ```
 
-You also need **Rust**, of course, which you can get by following [these](https://www.rust-lang.org/tools/install) instructions.
+You will also need the Rust language and utilities, of course, which you can get by following [these](https://www.rust-lang.org/tools/install) instructions.
 
-You can also use the `setupenv.sh` to automatically install dependencies for your OS (currently not working on MacOS)
+Additionally, you can also use the `setupenv.sh` to automatically install dependencies for your OS (currently not working on MacOS)
 
-After installing **Rust**, do:
+After installing Rust, do:
  ```bash
  rustup toolchain install nightly
  rustup override set nightly
