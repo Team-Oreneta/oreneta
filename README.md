@@ -8,7 +8,7 @@ First, you need to install a couple of dependencies. On Debian or Debian based d
 
 On Arch Linux, you can run `sudo pacman -S base-devel xorriso mtools nasm qemu-full`. 
 
-On Mac you can install the dependencies using [Brew](https://brew.sh/) and Xcode tools. You can install Xcode tools with: 'xcode-select --install' then install the rest of the dependencies with Brew (Commands coming soon). Verify the installation with:
+On Mac you can install the dependencies using [Brew](https://brew.sh/) and Xcode tools. You can install Xcode tools with: `xcode-select --install` then install the rest of the dependencies with Brew (Commands coming soon). Verify the installation with:
 
 ```
 nasm --version

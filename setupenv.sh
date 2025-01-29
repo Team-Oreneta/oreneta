@@ -6,7 +6,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 elif [ -f "/etc/os-release" ]; then
     if grep -q "Ubuntu\|Debian" /etc/os-release; then
         os=$"Debian/Ubuntu"
-	apt install base-devel nasm xorriso llvm-tools clang
+	apt install build-essential nasm xorriso llvm clang
 	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 	rustup toolchain install nightly
 	rustup override set nightly
