@@ -1,54 +1,26 @@
-use multiboot::information::{MemoryManagement, Multiboot, PAddr};
-use core::{mem, slice};
 use crate::framebuffer::Framebuffer;
-
-// Define a struct for memory management
-struct Mem;
-
-impl MemoryManagement for Mem {
-    // Convert a physical address to a slice
-    unsafe fn paddr_to_slice(&self, addr: PAddr, size: usize) -> Option<&'static [u8]> {
-        let ptr = mem::transmute(addr as *const u8);
-        Some(slice::from_raw_parts(ptr, size))
-    }
-
-    unsafe fn allocate(&mut self, _length: usize) -> Option<(PAddr, &mut [u8])> {
-        None
-    }
-
-    unsafe fn deallocate(&mut self, addr: PAddr) {
-        if addr != 0 {
-            unimplemented!()
-        }
-    }
-}
-
-// Static instance of Mem for the memory management of multiboot
-static mut MEM: Mem = Mem;
+use multiboot2::{BootInformation, BootInformationHeader};
 
 // Initialize Multiboot
-pub fn use_multiboot(info_ptr: PAddr) -> Multiboot<'static, 'static> {
-    unsafe { Multiboot::from_ptr(
-        info_ptr, &mut MEM
-    ).expect("Header error!") }
+pub fn use_multiboot(info_ptr: usize) -> BootInformation<'static> {
+    unsafe { BootInformation::load(info_ptr as *const BootInformationHeader).unwrap() }
 }
 
-// Retrieve framebuffer information from Multiboot
-pub fn get_framebuffer(
-    multiboot_struct: &Multiboot<'static, 'static>,
-) -> Framebuffer {
-    let s = multiboot_struct
-        .framebuffer_table()
-        .expect("Framebuffer not found!");
+// Retrieve framebuffer information from Multiboot 2
+pub fn get_framebuffer(multiboot_info: &BootInformation<'static>) -> Framebuffer {
+    let fb = multiboot_info
+        .framebuffer_tag()
+        .expect("Framebuffer not found.")
+        .unwrap();
 
     Framebuffer::new(
-        s.addr as u32,
-        s.width as usize,
-        s.height as usize,
+        fb.address() as u32,
+        fb.width() as usize,
+        fb.height() as usize,
     )
 }
 
-pub fn get_module(multiboot_struct: &Multiboot<'static, 'static>) -> u32 {
-    let mut modules = multiboot_struct.modules().unwrap();
-    modules.next().as_mut().unwrap().start as u32
+pub fn get_module(multiboot_struct: &BootInformation<'static>) -> u32 {
+    let mut modules = multiboot_struct.module_tags();
+    modules.next().as_mut().unwrap().start_address() as u32
 }

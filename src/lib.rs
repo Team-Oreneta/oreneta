@@ -5,9 +5,9 @@
 
 use core::panic::PanicInfo;
 use fs::tar::Ramdisk;
-use multiboot::information::PAddr;
 
 mod framebuffer;
+mod fs;
 mod gdt;
 mod idt;
 mod irq;
@@ -17,7 +17,6 @@ mod mb_utils;
 mod oiff;
 mod ports;
 mod system;
-mod fs;
 mod text;
 mod timer;
 
@@ -31,7 +30,7 @@ unsafe fn panic(info: &PanicInfo) -> ! {
 
 // Entry point of the kernel
 #[no_mangle]
-pub unsafe extern "C" fn kmain(info_ptr: PAddr) -> ! {
+pub unsafe extern "C" fn kmain(multiboot_info_address: usize) -> ! {
     // Initialize the GDT, IDT, ISR, IRQ, timer, and keyboard
     gdt::init_gdt();
     idt::init_idt();
@@ -41,26 +40,30 @@ pub unsafe extern "C" fn kmain(info_ptr: PAddr) -> ! {
     keyboard::init_keyboard();
 
     // Use the multiboot information structure
-    let multiboot_struct = mb_utils::use_multiboot(info_ptr);
+    let multiboot_info = mb_utils::use_multiboot(multiboot_info_address);
     // Get the framebuffer from the multiboot structure
-    let fb = mb_utils::get_framebuffer(&multiboot_struct);
+    let fb = mb_utils::get_framebuffer(&multiboot_info);
     // Set the default framebuffer for text output
     text::set_default_framebuffer(fb);
     // Find the address of the first module.
-    let initrd_address = mb_utils::get_module(&multiboot_struct);
+    let initrd_address = mb_utils::get_module(&multiboot_info);
 
     // Create the initial ramdisk
     let initrd = Ramdisk::new(initrd_address);
 
     // Load the logo from the ramdisk
     let logo = initrd.get_file("./oreneta-logo.oiff").unwrap();
-    
+
     // Display boot messages
     text::WRITER.lock().boot_message(logo);
     text::WRITER.lock().boot_message_loaded();
 
     let test_file = initrd.get_file("./etc/hello.txt").unwrap();
-    println!("The file {}'s length is {}, and the contents are:\n", test_file.read_name(), test_file.read_size());
+    println!(
+        "The file {}'s length is {}, and the contents are:\n",
+        test_file.read_name(),
+        test_file.read_size()
+    );
     test_file.write_contents();
 
     // Infinite loop to keep the kernel running

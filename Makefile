@@ -23,8 +23,7 @@ run: build/oreneta.iso
 	qemu-system-x86_64 -cdrom $<
 
 build/kernel.bin: rustbuild $(ASM_OBJ_FILES)
-	$(LD) -T $(LDFILE) -o $@ -ffreestanding -nostdlib $(ASM_OBJ_FILES) $(LIB_PATH) -lgcc
-
+	$(LD) -T $(LDFILE) -o $@ -ffreestanding -nostdlib $(ASM_OBJ_FILES) $(LIB_PATH) -lgcc --for-linker=-no-pie
 build/initrd: isoroot/
 	tar -H ustar -C $< -cf $@ .
 

@@ -2,14 +2,16 @@
 name = "oreneta"
 version = "0.1.0"
 edition = "2021"
-authors = ["Poyo <poyo@poyo.study, MrDaPoyo on GitHub>", "Segfault <AI314159 on GitHub>"]
+authors = [
+    "Poyo <poyo@poyo.study, MrDaPoyo on GitHub>",
+    "Segfault <AI314159 on GitHub>",
+]
 
 [profile.dev]
 panic = "abort"
 
 # Compile as a static library so we can link the Assembly
 [lib]
-path = "src/main.rs"
 name = "oreneta"
 crate-type = ["staticlib"]
 
@@ -17,8 +19,9 @@ crate-type = ["staticlib"]
 panic = "abort"
 
 [dependencies]
-multiboot = "0.8.0"
+multiboot2 = { version = "0.23.1", default-features = false }
 volatile = "0.6.1"
 font8x8 = { version = "0.3", default-features = false }
 lazy_static = { version = "1.5.0", features = ["spin_no_std"] }
 spin = "0.9.8"
+x86 = "0.52.0"

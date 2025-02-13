@@ -1,25 +1,33 @@
-MBALIGN    equ 1 << 0
-MEMINFO    equ 1 << 1
-VIDEOMODE  equ 1 << 2
-MBFLAGS    equ MBALIGN | MEMINFO | VIDEOMODE
-MAGIC      equ 0x1BADB002
-CHECKSUM   equ -(MAGIC + MBFLAGS)
+MAGIC    equ 0xE85250D6 ; Multiboot 2 magic
+ARCH     equ 0 ; i386
+LEN      equ (header_end - header_start) ; Length of the header
+CHECKSUM equ 0x100000000 - (MAGIC + ARCH + LEN)
 
-section .multiboot
-align 4
+section .multiboot2
+align 8
+header_start:
     dd MAGIC
-    dd MBFLAGS
+    dd ARCH
+    dd LEN
     dd CHECKSUM
-    dd 0
-    dd 0
-    dd 0
-    dd 0
-    dd 0
-    
-    dd 0
+
+fb_tag:
+    dw 5
+    dw 1
+    dd fb_tag_end - fb_tag
     dd 1024
     dd 768
     dd 32
+fb_tag_end:
+
+; For some reason, it errors if I don't do this.
+; I think there needs to be one of these between
+; all multiboot 2 tags.
+align 8
+
+    dd 0
+    dd 8
+header_end:
 
 section .bss
 align 16
