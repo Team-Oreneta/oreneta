@@ -16,6 +16,7 @@ mod keyboard;
 mod mb_utils;
 mod oiff;
 mod ports;
+mod serial;
 mod system;
 mod text;
 mod timer;
@@ -23,6 +24,7 @@ mod timer;
 // Define the panic handler function
 #[panic_handler]
 unsafe fn panic(info: &PanicInfo) -> ! {
+    qemu_println!("\nKernel panic:\n{}", info);
     println!("{}", info);
 
     loop {}
