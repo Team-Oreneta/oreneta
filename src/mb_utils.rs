@@ -1,9 +1,10 @@
 use crate::framebuffer::Framebuffer;
 use multiboot2::{BootInformation, BootInformationHeader};
+use crate::memory::VIRTUAL_MEMORY_OFFSET;
 
 // Initialize Multiboot
 pub fn use_multiboot(info_ptr: usize) -> BootInformation<'static> {
-    unsafe { BootInformation::load(info_ptr as *const BootInformationHeader).unwrap() }
+    unsafe { BootInformation::load((info_ptr + VIRTUAL_MEMORY_OFFSET) as *const BootInformationHeader).unwrap() }
 }
 
 // Retrieve framebuffer information from Multiboot 2
@@ -14,7 +15,7 @@ pub fn get_framebuffer(multiboot_info: &BootInformation<'static>) -> Framebuffer
         .unwrap();
 
     Framebuffer::new(
-        fb.address() as u32,
+        (fb.address() as usize + VIRTUAL_MEMORY_OFFSET) as u32,
         fb.width() as usize,
         fb.height() as usize,
     )

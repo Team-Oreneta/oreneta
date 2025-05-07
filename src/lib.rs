@@ -2,10 +2,11 @@
 // This is needed because the standard library relies on system functions.
 #![no_std]
 #![no_main]
+#![feature(core_intrinsics)]
 
 use core::panic::PanicInfo;
 use fs::tar::Ramdisk;
-
+mod config;
 mod framebuffer;
 mod fs;
 mod gdt;
@@ -14,12 +15,14 @@ mod irq;
 mod isrs;
 mod keyboard;
 mod mb_utils;
+mod memory;
 mod oiff;
 mod ports;
 mod serial;
 mod system;
 mod text;
 mod timer;
+mod vga_buffer;
 
 // Define the panic handler function
 #[panic_handler]
@@ -40,6 +43,13 @@ pub unsafe extern "C" fn kmain(multiboot_info_address: usize) -> ! {
     irq::init_irqs();
     timer::init_timer();
     keyboard::init_keyboard();
+
+    // 1 mb
+    memory::pmm::init_pmm(1048576);
+    // memory::pmm::test_simple();
+    memory::paging::init_paging();
+    println!("YAY");
+    loop {}
 
     // Use the multiboot information structure
     let multiboot_info = mb_utils::use_multiboot(multiboot_info_address);

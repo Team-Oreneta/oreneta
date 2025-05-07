@@ -11,9 +11,9 @@ LIB_PATH := target/$(ARCH)-oreneta/$(TARGET)/liboreneta.a
 ASM_SRC_FILES := $(wildcard src/arch/$(ARCH)/asm/*.asm)
 ASM_OBJ_FILES := $(patsubst src/arch/$(ARCH)/asm/%.asm, build/arch/$(ARCH)/asm/%.o, $(ASM_SRC_FILES))
 
-build/oreneta.iso: build/kernel.bin build/initrd
+build/oreneta.iso: build/kernel.elf build/initrd
 	@mkdir -p build/isofiles/boot/grub
-	@cp build/kernel.bin build/isofiles/boot/
+	@cp build/kernel.elf build/isofiles/boot/
 	@cp build/initrd build/isofiles/boot/
 	@cp $(GRUB_CFG) build/isofiles/boot/grub
 	@grub-mkrescue -o $@ build/isofiles
@@ -22,8 +22,8 @@ build/oreneta.iso: build/kernel.bin build/initrd
 run: build/oreneta.iso
 	qemu-system-x86_64 -cdrom $< -serial stdio
 
-build/kernel.bin: rustbuild $(ASM_OBJ_FILES)
-	$(LD) -T $(LDFILE) -o $@ -ffreestanding -nostdlib $(ASM_OBJ_FILES) $(LIB_PATH) -lgcc --for-linker=-no-pie
+build/kernel.elf: rustbuild $(ASM_OBJ_FILES)
+	$(LD) -T $(LDFILE) -o $@ -ffreestanding -nostdlib $(ASM_OBJ_FILES) $(LIB_PATH) --for-linker=-no-pie
 build/initrd: isoroot/
 	tar -H ustar -C $< -cf $@ .
 

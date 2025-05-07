@@ -1,4 +1,17 @@
 use volatile::Volatile;
+use lazy_static::lazy_static;
+use spin::Mutex;
+use crate::memory;
+use crate::ports;
+
+lazy_static! {
+    pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer {
+        column_position: 0,
+        row_position: 0,
+        color_code: ColorCode::new(Color::LightGray, Color::Black),
+        buffer: unsafe { &mut *((0xB8000 + memory::VIRTUAL_MEMORY_OFFSET) as *mut Buffer) },
+    });
+}
 
 // Define the color codes for the VGA text mode
 #[allow(dead_code)]
@@ -54,21 +67,30 @@ struct Buffer {
 // Handle writing to the VGA buffer
 pub struct Writer {
     column_position: usize,
+    row_position: usize,
     color_code: ColorCode,
     buffer: &'static mut Buffer,
 }
+
 
 impl Writer {
     // Write a single byte to the buffer
     pub fn write_byte(&mut self, byte: u8) {
         match byte {
             b'\n' => self.new_line(), // Handle newline
+            b'\x08' => {
+                if self.column_position > 0 {
+                    self.column_position -= 1; // Move cursor back one position
+                    self.write_byte(b' '); // Write a space to clear the character
+                    self.column_position -= 1; // Move cursor back again
+                }
+            }
             byte => {
                 if self.column_position >= BUFFER_WIDTH {
                     self.new_line(); // Move to new line if at the end of the current line
                 }
 
-                let row = BUFFER_HEIGHT - 1;
+                let row = self.row_position;
                 let col = self.column_position;
 
                 let color_code = self.color_code;
@@ -79,13 +101,46 @@ impl Writer {
                 self.column_position += 1;
             }
         }
+        self.move_cursor();
+    }
+
+    fn move_cursor(&self) {
+        let index = self.row_position * 80 + self.column_position;
+    
+        unsafe {
+            ports::outb(0x3D4, 14);
+            ports::outb(0x3D5, (index >> 8) as u8);
+            ports::outb(0x3D4, 15);
+            ports::outb(0x3D5, index as u8);
+        }
     }
 
 
-    fn new_line(&mut self) {/* TODO */}
-}
+    fn new_line(&mut self) {
+        self.column_position = 0; // Reset column position
+        self.row_position += 1;
+        if self.row_position >= BUFFER_HEIGHT {
+            self.scroll_up(); // Scroll up if at the end of the buffer
+        }
+    }
 
-impl Writer {
+    fn scroll_up(&mut self) {
+        for row in 1..BUFFER_HEIGHT {
+            for col in 0..BUFFER_WIDTH {
+                let character = self.buffer.chars[row][col].read();
+                self.buffer.chars[row - 1][col].write(character);
+            }
+        }
+        // Clear the last line
+        for col in 0..BUFFER_WIDTH {
+            self.buffer.chars[BUFFER_HEIGHT - 1][col].write(ScreenChar {
+                ascii_character: b' ',
+                color_code: self.color_code,
+            });
+        }
+        self.row_position -= 1;
+    }
+
     // Write a string to the buffer
     pub fn write_string(&mut self, s: &str) {
         for byte in s.bytes() {
@@ -107,18 +162,4 @@ impl fmt::Write for Writer {
         self.write_string(s);
         Ok(())
     }
-}
-
-
-pub fn print_something() {
-    use core::fmt::Write;
-    let mut writer = Writer {
-        column_position: 0,
-        color_code: ColorCode::new(Color::Yellow, Color::Black),
-        buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
-    };
-
-    writer.write_byte(b'H');
-    writer.write_string("ello! ");
-    write!(writer, "The numbers are {} and {}", 42, 1.0/3.0).unwrap();
 }

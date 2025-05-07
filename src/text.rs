@@ -7,7 +7,8 @@ use crate::framebuffer::Framebuffer;
 use crate::fs;
 use crate::oiff;
 use crate::timer::sleepticks;
-
+use crate::vga_buffer;
+use crate::config;
 const LINE_SPACING: usize = 12;
 
 lazy_static! {
@@ -171,7 +172,11 @@ impl Writer {
 // Implement the fmt::Write trait for Writer
 impl fmt::Write for Writer {
     fn write_str(&mut self, s: &str) -> fmt::Result {
-        self.print(s, 0xFFFFFF);
+        if config::USING_FRAMEBUFFER {
+            self.print(s, 0xFFFFFF);
+        } else {
+            vga_buffer::WRITER.lock().write_str(s).unwrap();
+        }
         Ok(())
     }
 }

@@ -1,3 +1,5 @@
+use core::arch::asm;
+
 use crate::idt;
 use crate::println;
 use crate::system;
@@ -117,12 +119,40 @@ const ERRS: [&str;32] = [
     "Reserved"
 ];
 
+static mut INTERRUPT_HANDLERS: [fn(system::Registers); 256] = [error_handler; 256];
+
 // Fault handler function
 #[no_mangle]
 fn fault_handler(r: system::Registers) {
     let int_no = r.int_no;
+    let (eax, ebx, ecx, edx,
+        esi, edi, ebp, esp,
+        eip, err_code) = (r.eax, r.ebx, r.ecx, r.edx,
+            r.esi, r.edi, r.ebp, r.esp, r.eip, r.err_code);
+
     if int_no < 32 {
-        println!("KERNEL PANIC:\nA fatal error occurred and your computer has been halted.\nError code: {}", ERRS[int_no as usize]);
-        loop {};
+        unsafe { INTERRUPT_HANDLERS[int_no as usize](r); }
     }
+
+    println!("Registers:");
+    println!(" EAX={:08x} EBX={:08x} ECX={:08x} EDX={:08x}", eax, ebx, ecx, edx);
+    println!(" ESI={:08x} EDI={:08x} EBP={:08x} ESP={:08x}", esi, edi, ebp, esp);
+
+    unsafe {
+        asm!("cli");
+        loop {
+            asm!("hlt");
+        }
+    }
+}
+
+pub fn register_interrupt_handler(i: usize, f: fn(system::Registers)) {
+    unsafe {
+        INTERRUPT_HANDLERS[i] = f;
+    }
+}
+
+fn error_handler(r: system::Registers) {
+    let int_no = r.int_no;
+    println!("KERNEL PANIC:\nA fatal error occurred and your computer has been halted.\nError code: {}", ERRS[int_no as usize]);
 }

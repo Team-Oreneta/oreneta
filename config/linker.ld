@@ -1,28 +1,29 @@
-ENTRY(_start)
-
+ENTRY(kernel_entry)
 SECTIONS
 {
-    . = 2M;
+    . = 0xC0100000;
 
-    .text BLOCK(4K) : ALIGN(4K)
+    .text ALIGN(4K) : AT(ADDR(.text)-0xC0000000)
     {
         *(.multiboot2)
         *(.text)
     }
-
-    .rodata BLOCK(4K) : ALIGN(4K)
+    .rodata ALIGN (4K) : AT(ADDR(.rodata)-0xC0000000)
     {
-        *(.data)
+        *(.rodata)
     }
 
-    .data BLOCK(4K) : ALIGN(4K)
+    .bss ALIGN(4K) : AT(ADDR(.bss)-0xC0000000)
     {
-        *(.data)
-    }
-
-    .bss BLOCK(4K) : ALIGN(4K)
-    {
-        *(COMMON)
+        *(.COMMON)
         *(.bss)
+        *(.initial_stack)
     }
+    .data ALIGN(4K) : AT(ADDR(.data)-0xC0000000)
+    {
+        *(.data)
+    }
+
+    end = .;
 }
+
