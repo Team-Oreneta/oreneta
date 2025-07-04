@@ -1,20 +1,22 @@
 use core::arch::asm;
 
-use modular_bitfield::prelude::*;
 use crate::{idt, isrs, memory::VIRTUAL_MEMORY_OFFSET, println, qemu_println};
+use modular_bitfield::prelude::*;
 
-use super::{MB, pmm::{self, PhysicalMemoryManager}};
+use super::{
+    pmm::{self, PhysicalMemoryManager},
+    MB,
+};
 
 const PAGE_SIZE: usize = 4096;
 const CR0_PG: u32 = 1 << 31;
 const CR4_PSE: u32 = 1 << 4;
-const KHEAP_INITIAL_SIZE: usize = 1048576;
+const KHEAP_INITIAL_SIZE: usize = 1024*512;
 const ERR_PRESENT: u32 = 0x1;
 const ERR_RW: u32 = 0x2;
 const ERR_USER: u32 = 0x4;
 const ERR_RESERVED: u32 = 0x8;
 const ERR_INST: u32 = 0x10;
-
 
 #[bitfield(bits = 32)]
 #[repr(C, packed)]
@@ -75,53 +77,89 @@ static mut PAGING_OPTIONS: PagingFlags = PagingFlags {
     heap_enabled: false,
 };
 
-
 pub fn init_paging() {
+    qemu_println!("PAGING: Starting initialization");
     unsafe {
+        asm!("cli");
+
         if FREE_MEMORY_AREA.is_null() {
             FREE_MEMORY_AREA = pmm::BITMAP.add(pmm::BITMAP_SIZE);
+            qemu_println!("PAGING: Set FREE_MEMORY_AREA to 0x{:x}", FREE_MEMORY_AREA as usize);
         }
     }
 
-    unsafe {PAGING_OPTIONS.current_directory = dumb_kmalloc(core::mem::size_of::<PageDirectory>(), true); }
-    isrs::register_interrupt_handler(14, page_fault_handler);
-    println!("Size: 0x{:x}", core::mem::size_of::<PageDirectory>());
-    qemu_println!("Set directory");
-    println!("Page directory: 0x{:x}", unsafe {PAGING_OPTIONS.current_directory} as usize);
     unsafe {
-        core::intrinsics::volatile_set_memory(
-            PAGING_OPTIONS.current_directory, 
-            0,
-            core::mem::size_of::<PageDirectory>()
-        );
+        PAGING_OPTIONS.current_directory = 
+            dumb_kmalloc(core::mem::size_of::<PageDirectory>(), true);
+        qemu_println!("PAGING: Allocated page directory at 0x{:x}", 
+            PAGING_OPTIONS.current_directory as usize);
     }
-    // I'm looping here to mamke sure the page fault is on this line.
-    loop {}
-    qemu_println!("Zeroed!");
 
+    qemu_println!("PAGING: Registering page fault handler");
+    isrs::register_interrupt_handler(14, page_fault_handler);
+
+    unsafe {
+        qemu_println!("PAGING: Zeroing page directory");
+        let ptr = PAGING_OPTIONS.current_directory as *mut u8;
+        core::ptr::write_bytes(ptr, 0, core::mem::size_of::<PageDirectory>());
+    }
+
+    // Map VGA buffer first to ensure we have output
+    qemu_println!("PAGING: Mapping VGA buffer");
+    let vga_virtual = 0xB8000 + VIRTUAL_MEMORY_OFFSET;
+    allocate_page(
+        unsafe { PAGING_OPTIONS.current_directory },
+        vga_virtual as *mut u8,
+        0xB8000 / PAGE_SIZE,
+        true,
+        true,
+    );
+
+    qemu_println!("PAGING: Mapping kernel pages");
     let mut i = VIRTUAL_MEMORY_OFFSET;
-    
     while i < VIRTUAL_MEMORY_OFFSET + (4 * MB) {
-        allocate_page(unsafe { PAGING_OPTIONS.current_directory }, i as *mut u8, 0, true, true);
+        qemu_println!("PAGING: Mapping 0x{:x}", i);
+        allocate_page(
+            unsafe { PAGING_OPTIONS.current_directory },
+            i as *mut u8,
+            0,
+            true,
+            true,
+        );
         i += PAGE_SIZE;
     }
     qemu_println!("Allocated stuff!");
     i = VIRTUAL_MEMORY_OFFSET + (4 * MB);
 
-    
     while i < VIRTUAL_MEMORY_OFFSET + (4 * MB) + KHEAP_INITIAL_SIZE {
-        allocate_page(unsafe { PAGING_OPTIONS.current_directory }, i as *mut u8, 0, true, true);
+        allocate_page(
+            unsafe { PAGING_OPTIONS.current_directory },
+            i as *mut u8,
+            0,
+            true,
+            true,
+        );
+        i += PAGE_SIZE;
     }
     qemu_println!("Allocated more stuff!");
 
 
     unsafe {
         switch_page_directory(PAGING_OPTIONS.current_directory, false);
+        qemu_println!("Page directory switched!");
         enable_paging();
     }
-    allocate_region(unsafe { PAGING_OPTIONS.current_directory }, 0x0, 0x10000, true, true, true);
+    
+    qemu_println!("Paging enabled!");
+    allocate_region(
+        unsafe { PAGING_OPTIONS.current_directory },
+        0x0,
+        0x10000,
+        true,
+        true,
+        true,
+    );
     qemu_println!("Done!");
-
 }
 
 fn dumb_kmalloc<T>(size: usize, align: bool) -> *mut T {
@@ -131,14 +169,16 @@ fn dumb_kmalloc<T>(size: usize, align: bool) -> *mut T {
         ret = page_align(ret as *const T) as *mut T;
     }
     unsafe { FREE_MEMORY_AREA = FREE_MEMORY_AREA.add(size) };
-    
+
     ret
 }
 
-
 fn virtual_to_physical<T>(dir: *mut PageDirectory, vaddr: *const T) -> *const T {
-    if !unsafe {PAGING_OPTIONS.enabled} {
-        return unsafe { vaddr.sub(VIRTUAL_MEMORY_OFFSET) }
+    qemu_println!("resolving address: 0x{:x}", vaddr as usize);
+
+    if !unsafe { PAGING_OPTIONS.enabled } {
+        // return unsafe { vaddr.sub(VIRTUAL_MEMORY_OFFSET) };
+        return unsafe { vaddr as usize - VIRTUAL_MEMORY_OFFSET} as *const T
     }
     let page_directory_index = page_directory_index(vaddr);
     let page_table_index = page_table_index(vaddr);
@@ -158,18 +198,30 @@ fn virtual_to_physical<T>(dir: *mut PageDirectory, vaddr: *const T) -> *const T 
 
     let frame: u32 = page_table.pages[page_table_index].frame();
     let physaddr = ((frame as usize) << 12) + page_frame_offset;
-    
-    physaddr as *const T
 
+    physaddr as *const T
 }
 
-fn allocate_region(dir: *mut PageDirectory, start_va: usize, end_va: usize, identity_map: bool, is_kernel: bool, is_writable: bool) {
+fn allocate_region(
+    dir: *mut PageDirectory,
+    start_va: usize,
+    end_va: usize,
+    identity_map: bool,
+    is_kernel: bool,
+    is_writable: bool,
+) {
     let mut start = start_va & 0xfffff000;
     let end = end_va & 0xfffff000;
 
     while start <= end {
         if identity_map {
-            allocate_page(dir, start as *const u8, start / PAGE_SIZE, is_kernel, is_writable);
+            allocate_page(
+                dir,
+                start as *const u8,
+                start / PAGE_SIZE,
+                is_kernel,
+                is_writable,
+            );
         } else {
             allocate_page(dir, start as *const u8, 0, is_kernel, is_writable);
         }
@@ -177,7 +229,13 @@ fn allocate_region(dir: *mut PageDirectory, start_va: usize, end_va: usize, iden
     }
 }
 
-fn allocate_page<T>(dir: *mut PageDirectory, vaddr: *const T, frame: usize, is_kernel: bool, is_writable: bool) {
+fn allocate_page<T>(
+    dir: *mut PageDirectory,
+    vaddr: *const T,
+    frame: usize,
+    is_kernel: bool,
+    is_writable: bool,
+) {
     let mut table: *mut PageTable = core::ptr::null_mut();
     if dir.is_null() {
         qemu_println!("Page directory is null!");
@@ -190,12 +248,15 @@ fn allocate_page<T>(dir: *mut PageDirectory, vaddr: *const T, frame: usize, is_k
     let mut table = unsafe { &*dir }.ref_tables[page_directory_index];
 
     if table.is_null() {
-        if !unsafe {PAGING_OPTIONS.heap_enabled } {
+        if !unsafe { PAGING_OPTIONS.heap_enabled } {
             table = dumb_kmalloc(core::mem::size_of::<PageTable>(), true);
         } else {
             todo!();
         }
-        unsafe { core::intrinsics::volatile_set_memory(table, 0, core::mem::size_of::<PageTable>()); }
+        unsafe {
+            // core::intrinsics::volatile_set_memory(table, 0, core::mem::size_of::<PageTable>());
+            core::ptr::write_bytes(table as *mut u8, 0, core::mem::size_of::<PageTable>());
+        }
 
         unsafe {
             let t = virtual_to_physical(PAGING_OPTIONS.current_directory, table) as u32;
@@ -209,12 +270,11 @@ fn allocate_page<T>(dir: *mut PageDirectory, vaddr: *const T, frame: usize, is_k
     }
 
     if !unsafe { &*table }.pages[page_table_index].present() {
-        let t =
-            if frame != 0 {
-                frame
-            } else {
-                pmm::allocate_block()
-            } as u32;
+        let t = if frame != 0 {
+            frame
+        } else {
+            pmm::allocate_block()
+        } as u32;
         unsafe { &mut *table }.pages[page_table_index].set_frame(t);
         unsafe { &mut *table }.pages[page_table_index].set_present(true);
         unsafe { &mut *table }.pages[page_table_index].set_rw(true);
@@ -222,7 +282,7 @@ fn allocate_page<T>(dir: *mut PageDirectory, vaddr: *const T, frame: usize, is_k
     }
 }
 
-pub unsafe fn switch_page_directory(page_dir: *mut PageDirectory, phys: bool) {
+unsafe fn switch_page_directory(page_dir: *mut PageDirectory, phys: bool) {
     let t: u32 = if !phys {
         // initial_page_directory is a pointer to the temp directory
         virtual_to_physical(initial_page_directory as *mut _, page_dir as *const u8) as u32
@@ -288,7 +348,6 @@ fn page_table_index<T>(vaddr: *const T) -> usize {
 fn page_frame_index<T>(vaddr: *const T) -> usize {
     (vaddr as usize) & 0xfff
 }
-
 
 fn is_aligned<T>(addr: *const T) -> bool {
     (addr as usize % PAGE_SIZE) == 0

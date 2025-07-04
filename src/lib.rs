@@ -36,6 +36,7 @@ unsafe fn panic(info: &PanicInfo) -> ! {
 // Entry point of the kernel
 #[no_mangle]
 pub unsafe extern "C" fn kmain(multiboot_info_address: usize) -> ! {
+    // loop{}
     // Initialize the GDT, IDT, ISR, IRQ, timer, and keyboard
     gdt::init_gdt();
     idt::init_idt();
@@ -45,10 +46,10 @@ pub unsafe extern "C" fn kmain(multiboot_info_address: usize) -> ! {
     keyboard::init_keyboard();
 
     // 1 mb
-    memory::pmm::init_pmm(1048576);
+    memory::pmm::init_pmm(1024 * 1024 * 1024);
     // memory::pmm::test_simple();
     memory::paging::init_paging();
-    println!("YAY");
+    // println!("YAY");
     loop {}
 
     // Use the multiboot information structure

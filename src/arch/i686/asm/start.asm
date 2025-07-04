@@ -154,7 +154,9 @@ initial_page_directory:
     dd 0x00000083
     times(PDE_INDEX - 1) dd 0
     dd 0x00000083
-    times (1024 - PDE_INDEX - 1) dd 0
+    dd 0x00400083
+    ; dd 0x00800083
+    times (1024 - PDE_INDEX - 2) dd 0
 
 section .initial_stack
 align 32
