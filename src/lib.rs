@@ -14,6 +14,7 @@ mod irq;
 mod isrs;
 mod keyboard;
 mod mb_utils;
+mod mouse;
 mod oiff;
 mod ports;
 mod serial;
@@ -40,6 +41,7 @@ pub unsafe extern "C" fn kmain(multiboot_info_address: usize) -> ! {
     irq::init_irqs();
     timer::init_timer();
     keyboard::init_keyboard();
+    mouse::init_mouse();
 
     // Use the multiboot information structure
     let multiboot_info = mb_utils::use_multiboot(multiboot_info_address);
